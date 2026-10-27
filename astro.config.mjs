@@ -10,7 +10,21 @@ import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
 // https://astro.build/config
 export default defineConfig({
     site: 'https://blog-5yo.pages.dev',
-    integrations: [expressiveCode({ plugins: [pluginLineNumbers()] }), sitemap(), mdx()],
+    integrations: [
+        expressiveCode({
+            plugins: [pluginLineNumbers()],
+            // 代码块主题跟随 html[data-theme]（与全站手动切换保持一致）：
+            // 指定一深一浅两套主题，并把主题名改成 dark/light，
+            // 默认的 data-theme 选择器即可命中；关掉媒体查询避免和手动选择打架。
+            themes: ['github-dark', 'github-light'],
+            useDarkModeMediaQuery: false,
+            customizeTheme: (theme) => {
+                theme.name = theme.name.includes('dark') ? 'dark' : 'light';
+            },
+        }),
+        sitemap(),
+        mdx(),
+    ],
     fonts: [
         {
             provider: fontProviders.local(),
