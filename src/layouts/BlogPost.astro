@@ -9,6 +9,9 @@ import Header from '../components/Header.astro';
 type Props = CollectionEntry<'blog'>['data'];
 
 const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+
+// 计算阅读时间（假设每分钟读400字）
+const readingTime = Math.ceil(Astro.props.body?.length / 400 || 0);
 ---
 
 <html lang="en">
@@ -49,6 +52,11 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 				margin-bottom: 0.5em;
 				color: rgb(var(--gray));
 			}
+			.reading-time {
+				font-size: 0.9em;
+				color: rgb(var(--gray));
+				margin-top: 0.2em;
+			}
 			.last-updated-on {
 				font-style: italic;
 			}
@@ -66,6 +74,11 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 					<div class="title">
 						<div class="date">
 							<FormattedDate date={pubDate} />
+							{readingTime > 0 && (
+								<div class="reading-time">
+									~{readingTime} min read
+								</div>
+							)}
 							{
 								updatedDate && (
 									<div class="last-updated-on">
