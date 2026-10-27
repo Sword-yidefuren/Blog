@@ -23,8 +23,12 @@ body {
 	margin: 0;
 	padding: 0;
 	text-align: left;
-	background: linear-gradient(var(--gray-gradient)) no-repeat;
-	background-size: 100% 600px;
+	/* 极简背景：冷白底 + 顶部两团极淡光晕（青 / 灰蓝），向下自然消失 */
+	background-color: #fbfcfd;
+	background-image:
+		radial-gradient(70em 34em at 12% -12%, rgba(34, 211, 238, 7%), transparent 60%),
+		radial-gradient(60em 30em at 92% -18%, rgba(148, 163, 184, 6%), transparent 62%);
+	background-repeat: no-repeat;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
 	color: rgb(var(--gray-dark));
@@ -171,7 +175,10 @@ hr {
 		0 16px 32px rgba(0, 0, 0, 45%);
 }
 html[data-theme='dark'] body {
-	background-color: #15171c;
+	background-color: #14161a;
+	background-image:
+		radial-gradient(70em 34em at 12% -12%, rgba(34, 211, 238, 12%), transparent 60%),
+		radial-gradient(60em 30em at 92% -18%, rgba(56, 189, 248, 7%), transparent 62%);
 }
 
 /* 主题切换按钮的图标显隐：浅色显示月亮（点它进深色），深色显示太阳 */
