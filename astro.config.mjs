@@ -5,11 +5,12 @@ import sitemap from '@astrojs/sitemap';
 import { defineConfig, fontProviders } from 'astro/config';
 
 import expressiveCode from 'astro-expressive-code';
+import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
 
 // https://astro.build/config
 export default defineConfig({
     site: 'https://blog-5yo.pages.dev',
-    integrations: [expressiveCode(), sitemap(), mdx()],
+    integrations: [expressiveCode({ plugins: [pluginLineNumbers()] }), sitemap(), mdx()],
     fonts: [
         {
             provider: fontProviders.local(),
