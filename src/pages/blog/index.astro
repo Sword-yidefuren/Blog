@@ -73,25 +73,6 @@ const posts = (await getCollection('blog')).sort(
 				font-size: 0.9em;
 				line-height: 1.5;
 			}
-			.more {
-				display: inline-flex;
-				align-items: center;
-				margin-top: 0.5em;
-				padding: 0.15em 0.65em;
-				border: 1px solid var(--accent);
-				border-radius: 999px;
-				color: var(--accent-text);
-				font-size: 0.8em;
-				line-height: 1.5;
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			.more:hover {
-				background: var(--accent);
-				border-color: var(--accent);
-				color: #082f33;
-				text-decoration: none;
-			}
 			ul li a:hover h4,
 			ul li a:hover .date {
 				color: var(--accent-text);
@@ -137,7 +118,6 @@ const posts = (await getCollection('blog')).sort(
 									</p>
 									{post.data.description && <p class="desc">{post.data.description}</p>}
 								</a>
-								<a class="more" href={`/blog/${post.id}/`}>继续阅读 →</a>
 							</li>
 						))
 					}

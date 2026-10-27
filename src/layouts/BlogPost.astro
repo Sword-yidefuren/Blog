@@ -184,6 +184,20 @@ const minutes = readingTime(Astro.props.body);
 				document.body.appendChild(toast);
 				window.setTimeout(() => toast.remove(), 6000);
 			}
+
+			// 回到顶部按钮：滚过一屏后出现
+			const backTop = document.createElement('button');
+			backTop.type = 'button';
+			backTop.className = 'back-to-top';
+			backTop.setAttribute('aria-label', '回到顶部');
+			backTop.textContent = '↑';
+			document.body.appendChild(backTop);
+			const syncBackTop = () => backTop.classList.toggle('show', window.scrollY > 600);
+			window.addEventListener('scroll', syncBackTop, { passive: true });
+			syncBackTop();
+			backTop.addEventListener('click', () => {
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+			});
 		</script>
 	</body>
 </html>

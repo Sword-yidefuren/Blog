@@ -200,3 +200,34 @@ html[data-theme='dark'] body {
 	font: inherit;
 	cursor: pointer;
 }
+
+/* 回到顶部按钮 */
+.back-to-top {
+	position: fixed;
+	right: 1.2em;
+	bottom: 1.2em;
+	width: 2.6em;
+	height: 2.6em;
+	padding: 0;
+	border: 1px solid rgba(34, 211, 238, 40%);
+	border-radius: 50%;
+	background: var(--header-bg);
+	color: var(--accent-text);
+	font-size: 1rem;
+	cursor: pointer;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(8px);
+	transition: 0.2s ease;
+	z-index: 10;
+}
+.back-to-top.show {
+	opacity: 1;
+	visibility: visible;
+	transform: none;
+}
+.back-to-top:hover {
+	background: var(--accent);
+	border-color: var(--accent);
+	color: #082f33;
+}
