@@ -5,8 +5,9 @@
  */
 
 :root {
-	--accent: #ff6ec7;
-	--accent-dark: #c94f9b;
+	--accent: #22d3ee;
+	--accent-dark: #0891b2;
+	--accent-text: #0e7490;
 	--black: 15, 18, 25;
 	--gray: 96, 115, 159;
 	--gray-light: 229, 233, 240;
@@ -66,10 +67,10 @@ b {
 	font-weight: 700;
 }
 a {
-	color: var(--accent);
+	color: var(--accent-text);
 }
 a:hover {
-	color: var(--accent);
+	color: var(--accent-text);
 }
 p {
 	margin-bottom: 1.2em;
@@ -144,8 +145,9 @@ hr {
 /* 深色模式：由 html[data-theme='dark'] 控制，
    BaseHead 的内联脚本会按「手动选择 > 系统偏好」初始化该属性。 */
 :root[data-theme='dark'] {
-	--accent: #ff6ec7;
-	--accent-dark: #ff9ed8;
+	--accent: #22d3ee;
+	--accent-dark: #67e8f9;
+	--accent-text: #22d3ee;
 	--black: 232, 236, 244;
 	--gray: 148, 158, 178;
 	--gray-light: 42, 48, 64;
