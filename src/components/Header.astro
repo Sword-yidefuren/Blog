@@ -6,7 +6,7 @@ import HeaderLink from './HeaderLink.astro';
 <header>
 	<nav>
 		<h2><a href="/">{SITE_TITLE}</a></h2>
-		<div class="internal-links">
+		<div class="internal-links" id="site-nav">
 			<HeaderLink href="/">首页</HeaderLink>
 			<HeaderLink href="/tags">标签</HeaderLink>
 			<HeaderLink href="/blog">文章</HeaderLink>
@@ -45,11 +45,21 @@ import HeaderLink from './HeaderLink.astro';
 					</g></svg
 				>
 			</button>
+			<button
+				type="button"
+				class="menu-btn"
+				aria-label="打开菜单"
+				aria-expanded="false"
+				aria-controls="site-nav"
+			>
+				<span></span><span></span><span></span>
+			</button>
 		</div>
 	</nav>
 </header>
 <style>
 	header {
+		position: relative;
 		margin: 0;
 		padding: 0 1em;
 		background: var(--header-bg);
@@ -104,9 +114,75 @@ import HeaderLink from './HeaderLink.astro';
 	.theme-toggle:hover {
 		color: var(--accent);
 	}
+	.internal-links {
+		display: flex;
+	}
+	.menu-btn {
+		display: none;
+		flex-direction: column;
+		justify-content: center;
+		gap: 5px;
+		width: 44px;
+		height: 44px;
+		padding: 0 11px;
+		border: 0;
+		border-radius: 8px;
+		background: none;
+		color: rgb(var(--gray));
+		cursor: pointer;
+	}
+	.menu-btn span {
+		display: block;
+		height: 2px;
+		border-radius: 2px;
+		background: currentColor;
+		transition: 0.2s ease;
+	}
+	.menu-btn.open span:nth-child(1) {
+		transform: translateY(7px) rotate(45deg);
+	}
+	.menu-btn.open span:nth-child(2) {
+		opacity: 0;
+	}
+	.menu-btn.open span:nth-child(3) {
+		transform: translateY(-7px) rotate(-45deg);
+	}
 	@media (max-width: 720px) {
 		.social-links {
 			display: none;
+		}
+		.menu-btn {
+			display: inline-flex;
+		}
+		.theme-toggle {
+			width: 44px;
+			height: 44px;
+		}
+		.internal-links {
+			display: none;
+			position: absolute;
+			top: 100%;
+			left: 0;
+			right: 0;
+			flex-direction: column;
+			padding: 0.4em 0;
+			background: var(--header-bg);
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 12%);
+			z-index: 30;
+		}
+		.internal-links.open {
+			display: flex;
+		}
+		.internal-links a {
+			display: flex;
+			align-items: center;
+			min-height: 44px;
+			padding: 0.85em 1.2em;
+			border-bottom: 0;
+		}
+		.internal-links a.active {
+			border-bottom: 0;
+			box-shadow: inset 3px 0 0 var(--accent);
 		}
 	}
 </style>
@@ -120,5 +196,33 @@ import HeaderLink from './HeaderLink.astro';
 		} catch {
 			// 存储不可用时仅本次会话生效
 		}
+	});
+
+	// 移动端汉堡菜单
+	const menuBtn = document.querySelector('.menu-btn');
+	const navPanel = document.querySelector('.internal-links');
+	const closeMenu = () => {
+		if (!menuBtn || !navPanel) return;
+		navPanel.classList.remove('open');
+		menuBtn.classList.remove('open');
+		menuBtn.setAttribute('aria-expanded', 'false');
+	};
+	menuBtn?.addEventListener('click', () => {
+		if (!navPanel) return;
+		const open = navPanel.classList.toggle('open');
+		menuBtn.classList.toggle('open', open);
+		menuBtn.setAttribute('aria-expanded', String(open));
+	});
+	navPanel?.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape') closeMenu();
+	});
+	document.addEventListener('click', (event) => {
+		if (!navPanel?.classList.contains('open')) return;
+		const target = event.target;
+		if (target instanceof Element && (target.closest('.internal-links') || target.closest('.menu-btn'))) {
+			return;
+		}
+		closeMenu();
 	});
 </script>

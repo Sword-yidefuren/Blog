@@ -122,6 +122,18 @@ hr {
 	main {
 		padding: 1em;
 	}
+	/* 触摸友好：标签胶囊加大点击区域 */
+	.tag {
+		padding: 0.3em 0.8em;
+	}
+}
+@media (max-width: 400px) {
+	body {
+		font-size: 15px;
+	}
+	.prose p {
+		margin-bottom: 1.4em;
+	}
 }
 
 .sr-only {
