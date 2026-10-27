@@ -108,5 +108,82 @@ const minutes = readingTime(Astro.props.body);
 			</article>
 		</main>
 		<Footer />
+		<script>
+			// 阅读续读：按滚动比例记录/恢复每篇文章的阅读进度
+			const key = `readpos:${location.pathname}`;
+			const store = {
+				get() {
+					try {
+						return localStorage.getItem(key);
+					} catch {
+						return null;
+					}
+				},
+				set(value) {
+					try {
+						localStorage.setItem(key, value);
+					} catch {
+						/* 存储不可用时忽略 */
+					}
+				},
+				clear() {
+					try {
+						localStorage.removeItem(key);
+					} catch {
+						/* 同上 */
+					}
+				},
+			};
+
+			// 避免浏览器自带的滚动恢复与续读打架
+			if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+			const saved = parseFloat(store.get() ?? '');
+			if (!Number.isNaN(saved) && saved > 0.02 && saved < 0.95) {
+				requestAnimationFrame(() => {
+					const max = document.documentElement.scrollHeight - window.innerHeight;
+					if (max > 0) {
+						window.scrollTo({ top: saved * max, behavior: 'auto' });
+						showResumeToast();
+					}
+				});
+			}
+
+			let timer = 0;
+			const save = () => {
+				const max = document.documentElement.scrollHeight - window.innerHeight;
+				if (max <= 0) return;
+				const ratio = window.scrollY / max;
+				// 读到 95% 以上视为读完，清空记录，下次从头开始
+				if (ratio > 0.95) store.clear();
+				else if (ratio > 0.02) store.set(String(ratio));
+			};
+			window.addEventListener(
+				'scroll',
+				() => {
+					clearTimeout(timer);
+					timer = window.setTimeout(save, 300);
+				},
+				{ passive: true },
+			);
+			window.addEventListener('pagehide', save);
+
+			function showResumeToast() {
+				const toast = document.createElement('div');
+				toast.className = 'read-resume-toast';
+				const text = document.createElement('span');
+				text.textContent = '已回到上次阅读位置';
+				const btn = document.createElement('button');
+				btn.type = 'button';
+				btn.textContent = '从头开始';
+				btn.addEventListener('click', () => {
+					window.scrollTo({ top: 0, behavior: 'smooth' });
+					toast.remove();
+				});
+				toast.append(text, btn);
+				document.body.appendChild(toast);
+				window.setTimeout(() => toast.remove(), 6000);
+			}
+		</script>
 	</body>
 </html>

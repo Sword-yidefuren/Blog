@@ -172,3 +172,31 @@ html[data-theme='dark'] body {
 [data-theme='dark'] .icon-moon {
 	display: none;
 }
+
+/* 续读提示条 */
+.read-resume-toast {
+	position: fixed;
+	left: 50%;
+	bottom: 1.5em;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	gap: 0.6em;
+	padding: 0.6em 1em;
+	border-radius: 999px;
+	background: var(--accent);
+	color: #082f33;
+	font-size: 0.9rem;
+	line-height: 1.4;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 18%);
+	z-index: 20;
+}
+.read-resume-toast button {
+	border: 0;
+	border-radius: 999px;
+	padding: 0.15em 0.6em;
+	background: rgba(255, 255, 255, 85%);
+	color: #082f33;
+	font: inherit;
+	cursor: pointer;
+}
