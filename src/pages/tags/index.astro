@@ -1,0 +1,77 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+
+const posts = await getCollection('blog');
+const counts = new Map<string, number>();
+for (const post of posts) {
+	for (const tag of post.data.tags) {
+		counts.set(tag, (counts.get(tag) ?? 0) + 1);
+	}
+}
+const tags = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-CN'));
+---
+
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`标签 | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		<style>
+			h1 {
+				margin-bottom: 1.2em;
+			}
+			ul {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.8em;
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+			ul a {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4em;
+				padding: 0.35em 0.9em;
+				border: 1px solid rgba(34, 211, 238, 50%);
+				border-radius: 999px;
+				text-decoration: none;
+				font-size: 0.95em;
+				transition: 0.2s ease;
+			}
+			ul a:hover {
+				background: var(--accent);
+				border-color: var(--accent);
+				color: #082f33;
+			}
+			ul a .count {
+				color: rgb(var(--gray));
+				font-size: 0.8em;
+			}
+			ul a:hover .count {
+				color: #082f33;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>标签</h1>
+			<ul>
+				{
+					tags.map(([tag, count]) => (
+						<li>
+							<a href={`/tags/${tag}/`}>
+								{tag}
+								<span class="count">{count}</span>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</main>
+		<Footer />
+	</body>
+</html>

@@ -9,7 +9,7 @@ import { readingTime } from '../utils/readingTime';
 
 type Props = CollectionEntry<'blog'>['data'] & { body?: string };
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, tags = [] } = Astro.props;
 const minutes = readingTime(Astro.props.body);
 ---
 
@@ -102,6 +102,17 @@ const minutes = readingTime(Astro.props.body);
 						</div>
 						<h1>{title}</h1>
 						<hr />
+						{
+							tags.length > 0 && (
+								<div class="post-tags">
+									{tags.map((tag) => (
+										<a class="tag" href={`/tags/${tag}/`}>
+											{tag}
+										</a>
+									))}
+								</div>
+							)
+						}
 					</div>
 					<slot />
 				</div>

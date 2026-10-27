@@ -1,0 +1,96 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Header from '../../components/Header.astro';
+import { SITE_TITLE } from '../../consts';
+
+export async function getStaticPaths() {
+	const posts = await getCollection('blog');
+	const allTags = new Set(posts.flatMap((post) => post.data.tags));
+	return [...allTags].map((tag) => ({
+		params: { tag },
+		props: {
+			tag,
+			posts: posts
+				.filter((post) => post.data.tags.includes(tag))
+				.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+		},
+	}));
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+---
+
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`标签：${tag} | ${SITE_TITLE}`} description={`标签「${tag}」下的全部文章`} />
+		<style>
+			h1 {
+				margin-bottom: 0.3em;
+			}
+			.back {
+				display: inline-block;
+				margin-bottom: 2em;
+				font-size: 0.9em;
+			}
+			ul {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+			li {
+				padding: 1em 0;
+				border-bottom: 1px solid rgb(var(--gray-light));
+			}
+			li:last-child {
+				border-bottom: 0;
+			}
+			li a {
+				text-decoration: none;
+			}
+			h2 {
+				margin: 0 0 0.3em;
+				font-size: 1.2em;
+			}
+			li a:hover h2 {
+				color: var(--accent-text);
+			}
+			.date {
+				margin: 0;
+				color: rgb(var(--gray));
+				font-size: 0.9em;
+			}
+			.desc {
+				margin: 0.3em 0 0;
+				color: rgb(var(--gray));
+				font-size: 0.95em;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>标签：{tag}</h1>
+			<a class="back" href="/tags/">← 全部标签</a>
+			<ul>
+				{
+					posts.map((post) => (
+						<li>
+							<a href={`/blog/${post.id}/`}>
+								<h2>{post.data.title}</h2>
+								<p class="date">
+									<FormattedDate date={post.data.pubDate} />
+								</p>
+								{post.data.description && <p class="desc">{post.data.description}</p>}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</main>
+		<Footer />
+	</body>
+</html>
