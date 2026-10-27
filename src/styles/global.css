@@ -23,11 +23,12 @@ body {
 	margin: 0;
 	padding: 0;
 	text-align: left;
-	/* 极简背景：冷白底 + 顶部青色光晕 + 右上淡紫弥散（呼应 nebula 皮肤） */
+	/* 极简背景：冷白底 + 顶部青紫双光晕 + 底部轻雾（能看出质感，但不抢字） */
 	background-color: #fbfcfd;
 	background-image:
-		radial-gradient(70em 34em at 12% -12%, rgba(34, 211, 238, 7%), transparent 60%),
-		radial-gradient(60em 30em at 92% -18%, rgba(180, 141, 245, 5%), transparent 62%);
+		radial-gradient(70em 34em at 12% -12%, rgba(34, 211, 238, 12%), transparent 58%),
+		radial-gradient(60em 30em at 92% -18%, rgba(180, 141, 245, 10%), transparent 60%),
+		radial-gradient(50em 26em at 50% 108%, rgba(34, 211, 238, 5%), transparent 65%);
 	background-repeat: no-repeat;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
