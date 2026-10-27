@@ -18,6 +18,20 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const { title, description, image = FallbackImage } = Astro.props;
 ---
 
+<!-- 主题初始化：在首屏渲染前设置 html[data-theme]，避免深色模式闪白 -->
+<script is:inline>
+	(() => {
+		let saved = null;
+		try {
+			saved = localStorage.getItem('theme');
+		} catch (e) {
+			// 隐私模式等场景下存储不可用，忽略即可
+		}
+		const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		document.documentElement.dataset.theme = saved ?? (systemDark ? 'dark' : 'light');
+	})();
+</script>
+
 <!-- Global Metadata -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />

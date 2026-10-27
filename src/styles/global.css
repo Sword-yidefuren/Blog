@@ -27,7 +27,7 @@ body {
 	word-wrap: break-word;
 	overflow-wrap: break-word;
 	color: rgb(var(--gray-dark));
-	font-size: 20px;
+	font-size: 18px;
 	line-height: 1.7;
 }
 main {
@@ -116,7 +116,7 @@ hr {
 }
 @media (max-width: 720px) {
 	body {
-		font-size: 18px;
+		font-size: 16px;
 	}
 	main {
 		padding: 1em;
@@ -141,22 +141,32 @@ hr {
 	white-space: nowrap;
 }
 
-/* 深色模式：跟随系统设置，深灰背景 + 柔和粉强调色 */
-@media (prefers-color-scheme: dark) {
-	:root {
-		--accent: #ff6ec7;
-		--accent-dark: #ff9ed8;
-		--black: 232, 236, 244;
-		--gray: 148, 158, 178;
-		--gray-light: 42, 48, 64;
-		--gray-dark: 214, 219, 229;
-		--gray-gradient: rgba(42, 48, 64, 50%), #15171c;
-		--header-bg: #1c1f26;
-		--box-shadow:
-			0 2px 6px rgba(0, 0, 0, 40%), 0 8px 24px rgba(0, 0, 0, 45%),
-			0 16px 32px rgba(0, 0, 0, 45%);
-	}
-	body {
-		background-color: #15171c;
-	}
+/* 深色模式：由 html[data-theme='dark'] 控制，
+   BaseHead 的内联脚本会按「手动选择 > 系统偏好」初始化该属性。 */
+:root[data-theme='dark'] {
+	--accent: #ff6ec7;
+	--accent-dark: #ff9ed8;
+	--black: 232, 236, 244;
+	--gray: 148, 158, 178;
+	--gray-light: 42, 48, 64;
+	--gray-dark: 214, 219, 229;
+	--gray-gradient: rgba(42, 48, 64, 50%), #15171c;
+	--header-bg: #1c1f26;
+	--box-shadow:
+		0 2px 6px rgba(0, 0, 0, 40%), 0 8px 24px rgba(0, 0, 0, 45%),
+		0 16px 32px rgba(0, 0, 0, 45%);
+}
+html[data-theme='dark'] body {
+	background-color: #15171c;
+}
+
+/* 主题切换按钮的图标显隐：浅色显示月亮（点它进深色），深色显示太阳 */
+.icon-sun {
+	display: none;
+}
+[data-theme='dark'] .icon-sun {
+	display: inline;
+}
+[data-theme='dark'] .icon-moon {
+	display: none;
 }
