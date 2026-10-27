@@ -5,18 +5,31 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
+import { readingTime } from '../utils/readingTime';
 
 type Props = CollectionEntry<'blog'>['data'] & { body?: string };
 
 const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
-
-// 计算阅读时间（中文按每分钟约400字估算）
-const readingTime = Math.ceil((Astro.props.body?.length ?? 0) / 400);
+const minutes = readingTime(Astro.props.body);
 ---
 
-<html lang="en">
+<html lang="zh-CN">
 	<head>
 		<BaseHead title={title} description={description} />
+		<script
+			type="application/ld+json"
+			is:inline
+			set:html={JSON.stringify({
+				'@context': 'https://schema.org',
+				'@type': 'BlogPosting',
+				headline: title,
+				description,
+				datePublished: pubDate.toISOString(),
+				dateModified: (updatedDate ?? pubDate).toISOString(),
+				author: { '@type': 'Person', name: 'Sword' },
+				mainEntityOfPage: Astro.url.href,
+			})}
+		></script>
 		<style>
 			main {
 				width: calc(100% - 2em);
@@ -74,9 +87,9 @@ const readingTime = Math.ceil((Astro.props.body?.length ?? 0) / 400);
 					<div class="title">
 						<div class="date">
 							<FormattedDate date={pubDate} />
-							{readingTime > 0 && (
+							{minutes > 0 && (
 								<div class="reading-time">
-									~{readingTime} min read
+									约 {minutes} 分钟
 								</div>
 							)}
 							{
