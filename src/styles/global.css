@@ -23,11 +23,11 @@ body {
 	margin: 0;
 	padding: 0;
 	text-align: left;
-	/* 极简背景：冷白底 + 顶部两团极淡光晕（青 / 灰蓝），向下自然消失 */
+	/* 极简背景：冷白底 + 顶部青色光晕 + 右上淡紫弥散（呼应 nebula 皮肤） */
 	background-color: #fbfcfd;
 	background-image:
 		radial-gradient(70em 34em at 12% -12%, rgba(34, 211, 238, 7%), transparent 60%),
-		radial-gradient(60em 30em at 92% -18%, rgba(148, 163, 184, 6%), transparent 62%);
+		radial-gradient(60em 30em at 92% -18%, rgba(180, 141, 245, 5%), transparent 62%);
 	background-repeat: no-repeat;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
@@ -168,17 +168,19 @@ hr {
 	--gray: 148, 158, 178;
 	--gray-light: 42, 48, 64;
 	--gray-dark: 214, 219, 229;
-	--gray-gradient: rgba(42, 48, 64, 50%), #15171c;
-	--header-bg: #1c1f26;
+	--gray-gradient: rgba(42, 48, 64, 50%), #131116;
+	--header-bg: #17141c;
 	--box-shadow:
 		0 2px 6px rgba(0, 0, 0, 40%), 0 8px 24px rgba(0, 0, 0, 45%),
 		0 16px 32px rgba(0, 0, 0, 45%);
 }
 html[data-theme='dark'] body {
-	background-color: #14161a;
+	/* nebula 星云紫：深紫黑底 + 顶部紫光弥散 + 右上青辉 + 底部暗紫回光 */
+	background-color: #131116;
 	background-image:
-		radial-gradient(70em 34em at 12% -12%, rgba(34, 211, 238, 12%), transparent 60%),
-		radial-gradient(60em 30em at 92% -18%, rgba(56, 189, 248, 7%), transparent 62%);
+		radial-gradient(65em 32em at 15% -10%, rgba(180, 141, 245, 16%), transparent 62%),
+		radial-gradient(50em 26em at 85% -14%, rgba(34, 211, 238, 8%), transparent 60%),
+		radial-gradient(45em 26em at 50% 112%, rgba(180, 141, 245, 7%), transparent 66%);
 }
 
 /* 主题切换按钮的图标显隐：浅色显示月亮（点它进深色），深色显示太阳 */
