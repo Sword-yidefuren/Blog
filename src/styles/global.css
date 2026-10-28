@@ -98,6 +98,16 @@ img {
 	height: auto;
 	border-radius: 8px;
 }
+figure {
+	margin: 2em 0;
+	text-align: center;
+}
+figcaption {
+	margin-top: 0.6em;
+	color: rgb(var(--gray));
+	font-size: 0.85em;
+	line-height: 1.5;
+}
 code {
 	padding: 2px 5px;
 	background-color: rgb(var(--gray-light));
