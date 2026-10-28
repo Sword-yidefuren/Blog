@@ -1,0 +1,55 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+---
+
+<html lang="zh-CN">
+	<head>
+		<BaseHead title="页面走丢了 | 我的小站" description="这个页面不存在" />
+		<style>
+			h1 {
+				font-size: 4em;
+				margin: 0 0 0.3em;
+				color: var(--accent);
+			}
+			p {
+				margin: 0 0 0.8em;
+			}
+			.panic {
+				color: rgb(var(--gray));
+			}
+			.actions {
+				margin-top: 1.6em;
+				display: flex;
+				gap: 1em;
+				flex-wrap: wrap;
+			}
+			.actions a {
+				display: inline-block;
+				padding: 0.5em 1.1em;
+				border: 1px solid var(--accent);
+				border-radius: 999px;
+				text-decoration: none;
+			}
+			.actions a:hover {
+				background: var(--accent);
+				color: #082f33;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>404</h1>
+			<p>这页不存在——要么我改坏了（划掉），要么你点错了链接，要么它从来没存在过。</p>
+			<p class="panic">别慌，下面是出口。</p>
+			<div class="actions">
+				<a href="/">回首页</a>
+				<a href="/blog">看文章</a>
+				<a href="/tags">翻标签</a>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

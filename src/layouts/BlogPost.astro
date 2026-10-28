@@ -7,9 +7,13 @@ import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import { readingTime } from '../utils/readingTime';
 
-type Props = CollectionEntry<'blog'>['data'] & { body?: string };
+type Props = CollectionEntry<'blog'>['data'] & {
+	body?: string;
+	prev?: { id: string; title: string } | null;
+	next?: { id: string; title: string } | null;
+};
 
-const { title, description, pubDate, updatedDate, heroImage, tags = [] } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, tags = [], prev, next } = Astro.props;
 const minutes = readingTime(Astro.props.body);
 ---
 
@@ -115,6 +119,28 @@ const minutes = readingTime(Astro.props.body);
 						}
 					</div>
 					<slot />
+					{
+						(prev || next) && (
+							<nav class="post-nav" aria-label="上一篇与下一篇">
+								{prev ? (
+									<a class="prev" href={`/blog/${prev.id}/`}>
+										<span class="dir">← 上一篇</span>
+										<strong>{prev.title}</strong>
+									</a>
+								) : (
+									<span />
+								)}
+								{next ? (
+									<a class="next" href={`/blog/${next.id}/`}>
+										<span class="dir">下一篇 →</span>
+										<strong>{next.title}</strong>
+									</a>
+								) : (
+									<span />
+								)}
+							</nav>
+						)
+					}
 				</div>
 			</article>
 		</main>
@@ -208,6 +234,33 @@ const minutes = readingTime(Astro.props.body);
 			syncBackTop();
 			backTop.addEventListener('click', () => {
 				window.scrollTo({ top: 0, behavior: 'smooth' });
+			});
+
+			// 图片灯箱：点正文里的图片放大，点任意处或 Esc 关闭
+			let lightbox = null;
+			document.addEventListener('click', (event) => {
+				const target = event.target;
+				if (!(target instanceof HTMLImageElement)) return;
+				if (!target.closest('.prose')) return;
+				lightbox?.remove();
+				const overlay = document.createElement('div');
+				overlay.className = 'lightbox';
+				overlay.setAttribute('role', 'dialog');
+				overlay.setAttribute('aria-label', '查看大图');
+				const big = new Image();
+				big.src = target.currentSrc || target.src;
+				big.alt = target.alt;
+				overlay.appendChild(big);
+				overlay.addEventListener('click', () => overlay.remove());
+				document.body.appendChild(overlay);
+				requestAnimationFrame(() => overlay.classList.add('show'));
+				lightbox = overlay;
+			});
+			document.addEventListener('keydown', (event) => {
+				if (event.key === 'Escape') {
+					lightbox?.remove();
+					lightbox = null;
+				}
 			});
 		</script>
 	</body>

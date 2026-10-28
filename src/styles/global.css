@@ -257,6 +257,74 @@ html[data-theme='dark'] body {
 	color: #082f33;
 }
 
+/* 图片灯箱 */
+.prose img {
+	cursor: zoom-in;
+}
+.lightbox {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2vmin;
+	background: rgba(8, 10, 14, 92%);
+	cursor: zoom-out;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+.lightbox.show {
+	opacity: 1;
+}
+.lightbox img {
+	max-width: 100%;
+	max-height: 100%;
+	border-radius: 6px;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 55%);
+}
+
+/* 上一篇 / 下一篇 */
+.post-nav {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1em;
+	margin-top: 3em;
+}
+.post-nav a {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35em;
+	padding: 1em;
+	border: 1px solid rgb(var(--gray-light));
+	border-radius: 8px;
+	text-decoration: none;
+	transition: 0.2s ease;
+}
+.post-nav a:hover {
+	border-color: var(--accent);
+}
+.post-nav .dir {
+	color: rgb(var(--gray));
+	font-size: 0.85em;
+}
+.post-nav strong {
+	font-size: 0.95em;
+	line-height: 1.4;
+}
+.post-nav .next {
+	text-align: right;
+	grid-column: 2;
+}
+@media (max-width: 720px) {
+	.post-nav {
+		grid-template-columns: 1fr;
+	}
+	.post-nav .next {
+		grid-column: 1;
+	}
+}
+
 /* 回到顶部按钮 */
 .back-to-top {
 	position: fixed;
