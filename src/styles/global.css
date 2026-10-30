@@ -83,6 +83,14 @@ p {
 .prose p {
 	margin-bottom: 2em;
 }
+/* markdown 的「松散列表」（条目之间空了一行）会给 li 套上 <p>，
+   别让它按正文段落那样拉开 2em，否则列表读起来像一堆独立段落 */
+.prose li > p {
+	margin: 0 0 0.5em;
+}
+.prose li > p:last-child {
+	margin-bottom: 0;
+}
 textarea {
 	width: 100%;
 	font-size: 16px;
