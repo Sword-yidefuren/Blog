@@ -1,32 +1,474 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const latest = posts.slice(0, 4);
+
+// 首页只露最近几篇；年份久远也不至于误读，这里保持「月日」的轻量写法
+const shortDate = (date: Date) => `${date.getMonth() + 1} 月 ${date.getDate()} 日`;
+
+type TagName = '生活' | '学习' | '工作';
+
+const topics: { name: TagName; note: string; count: number }[] = [
+	{ name: '学习', note: '笔记、踩坑、跟着 AI 学新东西', count: 0 },
+	{ name: '生活', note: '日常、情绪、偶尔的碎碎念', count: 0 },
+	{ name: '工作', note: '实习、求职、做项目的过程', count: 0 },
+].map((topic) => ({
+	...topic,
+	count: posts.filter((post) => post.data.tags.includes(topic.name)).length,
+}));
+
+const firstPost = posts.at(-1);
+const newestPost = posts[0];
 ---
 
 <!doctype html>
 <html lang="zh-CN">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			/* 首页比正文略宽，但不到列表页的 960，留出呼吸感 */
+			main {
+				width: 820px;
+				padding: 4em 1em 2em;
+			}
+
+			/* ---------- 头图区 ---------- */
+			.hero {
+				padding: 0 0 1.6em;
+			}
+			.kicker {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.55em;
+				margin: 0 0 1.4em;
+				color: rgb(var(--gray));
+				font-size: 0.82em;
+				letter-spacing: 0.14em;
+			}
+			.kicker::before {
+				content: '';
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+				background: var(--accent);
+				box-shadow: 0 0 0 4px rgba(34, 211, 238, 16%);
+			}
+			h1 {
+				margin: 0 0 0.55em;
+				font-size: clamp(2.1rem, 6vw, 3.2rem);
+				line-height: 1.18;
+				letter-spacing: -0.01em;
+			}
+			h1 .emoji {
+				margin-left: 0.08em;
+				font-size: 0.8em;
+			}
+			.lede {
+				max-width: 33em;
+				margin: 0 0 2em;
+				color: rgb(var(--gray-dark));
+				font-size: 1.05em;
+				line-height: 1.85;
+			}
+			.hero-actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.7em;
+			}
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4em;
+				padding: 0.62em 1.2em;
+				border: 1px solid transparent;
+				border-radius: 999px;
+				font-size: 0.92em;
+				line-height: 1.4;
+				text-decoration: none;
+				transition:
+					transform 0.2s ease,
+					box-shadow 0.2s ease,
+					border-color 0.2s ease,
+					color 0.2s ease;
+			}
+			.btn-primary {
+				background: var(--accent);
+				color: #082f33;
+				font-weight: 700;
+				box-shadow: 0 6px 18px rgba(34, 211, 238, 22%);
+			}
+			.btn-primary:hover {
+				color: #082f33;
+				transform: translateY(-1px);
+				box-shadow: 0 10px 24px rgba(34, 211, 238, 30%);
+			}
+			.btn-ghost {
+				border-color: rgb(var(--gray-light));
+				color: rgb(var(--gray-dark));
+			}
+			.btn-ghost:hover {
+				border-color: var(--accent);
+				color: var(--accent-text);
+			}
+			.hero-meta {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5em;
+				margin: 2em 0 0;
+				color: rgb(var(--gray));
+				font-size: 0.82em;
+				letter-spacing: 0.02em;
+			}
+			.hero-meta span[aria-hidden] {
+				opacity: 0.6;
+			}
+
+			/* ---------- 区块通用 ---------- */
+			.section {
+				margin-top: 3.4em;
+			}
+			.sec-head {
+				display: flex;
+				align-items: baseline;
+				justify-content: space-between;
+				gap: 1em;
+				margin: 0 0 0.4em;
+				padding-bottom: 0.75em;
+				border-bottom: 1px solid rgb(var(--gray-light));
+			}
+			.sec-head h2 {
+				display: flex;
+				align-items: center;
+				margin: 0;
+				font-size: 1.02em;
+				font-weight: 700;
+				letter-spacing: 0.04em;
+			}
+			.sec-head h2::before {
+				content: '';
+				width: 3px;
+				height: 0.92em;
+				margin-right: 0.6em;
+				border-radius: 2px;
+				background: var(--accent);
+			}
+			.sec-head > a {
+				flex-shrink: 0;
+				color: rgb(var(--gray));
+				font-size: 0.84em;
+				text-decoration: none;
+			}
+			.sec-head > a:hover {
+				color: var(--accent-text);
+			}
+
+			/* ---------- 最近在写 ---------- */
+			.posts {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+			.posts li + li {
+				border-top: 1px solid rgb(var(--gray-light));
+			}
+			.posts a {
+				display: grid;
+				grid-template-columns: 4.9em 1fr;
+				gap: 0 1.4em;
+				padding: 1.05em 0;
+				text-decoration: none;
+			}
+			.post-date {
+				padding-top: 0.25em;
+				color: rgb(var(--gray));
+				font-size: 0.8em;
+				font-variant-numeric: tabular-nums;
+				white-space: nowrap;
+			}
+			.post-body {
+				display: block;
+				min-width: 0;
+			}
+			.post-title {
+				display: block;
+				color: rgb(var(--black));
+				font-size: 1.06em;
+				font-weight: 700;
+				line-height: 1.45;
+				transition: color 0.2s ease;
+			}
+			.post-desc {
+				display: -webkit-box;
+				overflow: hidden;
+				margin: 0.3em 0 0;
+				color: rgb(var(--gray));
+				font-size: 0.88em;
+				line-height: 1.6;
+				-webkit-box-orient: vertical;
+				-webkit-line-clamp: 1;
+			}
+			.posts a:hover .post-title {
+				color: var(--accent-text);
+			}
+
+			/* ---------- 按主题逛 ---------- */
+			.topics {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 0.9em;
+				list-style: none;
+				margin: 1.1em 0 0;
+				padding: 0;
+			}
+			.topics li {
+				display: flex;
+			}
+			.topic {
+				display: flex;
+				flex: 1;
+				flex-direction: column;
+				gap: 0.5em;
+				padding: 1.1em 1.2em;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 12px;
+				background: rgb(var(--header-bg));
+				text-decoration: none;
+				transition:
+					transform 0.2s ease,
+					border-color 0.2s ease,
+					box-shadow 0.2s ease;
+			}
+			.topic:hover {
+				border-color: var(--accent);
+				box-shadow: 0 8px 22px rgba(var(--gray), 14%);
+				transform: translateY(-2px);
+			}
+			.topic-top {
+				display: flex;
+				align-items: baseline;
+				justify-content: space-between;
+				gap: 0.5em;
+			}
+			.topic-name {
+				color: rgb(var(--black));
+				font-weight: 700;
+			}
+			.topic-count {
+				color: rgb(var(--gray));
+				font-size: 0.78em;
+				white-space: nowrap;
+			}
+			.topic-note {
+				color: rgb(var(--gray));
+				font-size: 0.84em;
+				line-height: 1.6;
+			}
+			.topic:hover .topic-name {
+				color: var(--accent-text);
+			}
+
+			/* ---------- 现在 ---------- */
+			.now {
+				margin-top: 3.4em;
+				padding: 1.4em 1.6em;
+				border: 1px solid rgb(var(--gray-light));
+				border-left: 3px solid var(--accent);
+				border-radius: 10px;
+				background: rgb(var(--header-bg));
+			}
+			.now h2 {
+				margin: 0 0 0.9em;
+				color: rgb(var(--gray));
+				font-size: 0.78em;
+				font-weight: 700;
+				letter-spacing: 0.18em;
+			}
+			.now dl {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 0.8em 1.4em;
+				margin: 0;
+			}
+			.now dt {
+				margin-bottom: 0.15em;
+				color: rgb(var(--gray));
+				font-size: 0.78em;
+				letter-spacing: 0.06em;
+			}
+			.now dd {
+				margin: 0;
+				color: rgb(var(--gray-dark));
+				font-size: 0.94em;
+				line-height: 1.55;
+			}
+
+			/* ---------- 收尾 ---------- */
+			.closing {
+				margin: 3em 0 0;
+				color: rgb(var(--gray));
+				font-size: 0.92em;
+				text-align: center;
+			}
+			.closing a {
+				text-decoration: none;
+				border-bottom: 1px dashed rgba(34, 211, 238, 60%);
+			}
+
+			a:focus-visible {
+				outline: 2px solid var(--accent);
+				outline-offset: 3px;
+				border-radius: 4px;
+			}
+
+			@media (max-width: 720px) {
+				main {
+					padding: 2em 1em 1.5em;
+				}
+				.hero {
+					padding-bottom: 2.2em;
+				}
+				.lede {
+					font-size: 1em;
+				}
+				.posts a {
+					grid-template-columns: 1fr;
+					gap: 0.25em;
+					padding: 0.95em 0;
+				}
+				.post-date {
+					padding-top: 0;
+					font-size: 0.76em;
+				}
+				.topics {
+					grid-template-columns: 1fr;
+				}
+				.now dl {
+					grid-template-columns: 1fr;
+					gap: 0.7em;
+				}
+				.now {
+					padding: 1.2em 1.3em;
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				.btn,
+				.topic,
+				.post-title {
+					transition: none;
+				}
+				.btn-primary:hover,
+				.topic:hover {
+					transform: none;
+				}
+			}
+		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>一个菜B的练手😀</h1>
-			<p>
-				哈喽啊！我是 Sword ，这是「我的小站」。我会在这儿记录我学习编程的遇到的困难与解决方案、跟着AI学习的日常，和生活里的小事。
-			</p>
-			<p>
-				接下来我想写的东西：
-			</p>
-			<ul>
-				<li>学前端 / 编程的学习笔记（懵逼日记）</li>
-				<li>跟着AI大佬学习的日常</li>
-				<li>偶尔的生活随笔</li>
-			</ul>
-			<p>
-				别进嗷，里面没啥好东西 → <a href="/blog">一大坨</a>
+			<section class="hero">
+				<p class="kicker">学习 · 生活 · 工作</p>
+				<h1>一个菜B的练手<span class="emoji">😀</span></h1>
+				<p class="lede">
+					哈喽，我是 Sword，一个还在跟代码互相折磨的大二学生。这里记我学编程踩过的坑和最后的解法、跟着 AI 折腾的日常，还有生活里那些小事。
+				</p>
+				<div class="hero-actions">
+					<a class="btn btn-primary" href="/blog/">读点东西 →</a>
+					<a class="btn btn-ghost" href="/about/">我是谁</a>
+				</div>
+				{
+					newestPost && (
+						<p class="hero-meta">
+							<span>{posts.length} 篇文章</span>
+							<span aria-hidden="true">·</span>
+							{firstPost && (
+								<>
+									<span>
+										从 {firstPost.data.pubDate.getFullYear()} 年 {firstPost.data.pubDate.getMonth() + 1} 月开始
+									</span>
+									<span aria-hidden="true">·</span>
+								</>
+							)}
+							<span>最近更新 {shortDate(newestPost.data.pubDate)}</span>
+						</p>
+					)
+				}
+			</section>
+
+			<section class="section">
+				<div class="sec-head">
+					<h2>最近在写</h2>
+					<a href="/blog/">全部 {posts.length} 篇 →</a>
+				</div>
+				<ul class="posts">
+					{
+						latest.map((post) => (
+							<li>
+								<a href={`/blog/${post.id}/`}>
+									<time class="post-date" datetime={post.data.pubDate.toISOString()}>
+										{shortDate(post.data.pubDate)}
+									</time>
+									<span class="post-body">
+										<span class="post-title">{post.data.title}</span>
+										<span class="post-desc">{post.data.description}</span>
+									</span>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</section>
+
+			<section class="section">
+				<div class="sec-head">
+					<h2>按主题逛</h2>
+					<a href="/tags/">全部标签 →</a>
+				</div>
+				<ul class="topics">
+					{
+						topics.map((topic) => (
+							<li>
+								<a class="topic" href={`/tags/${topic.name}/`}>
+									<span class="topic-top">
+										<span class="topic-name">{topic.name}</span>
+										<span class="topic-count">{topic.count} 篇</span>
+									</span>
+									<span class="topic-note">{topic.note}</span>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</section>
+
+			<section class="now">
+				<h2>现在</h2>
+				<dl>
+					<div>
+						<dt>在读</dt>
+						<dd>计算机科学与技术 · 大二</dd>
+					</div>
+					<div>
+						<dt>在干</dt>
+						<dd>深圳 · 实习中</dd>
+					</div>
+					<div>
+						<dt>在找</dt>
+						<dd>一份前端 / 全栈实习</dd>
+					</div>
+				</dl>
+			</section>
+
+			<p class="closing">
+				别进嗷，里面没啥好东西 → <a href="/blog/">一大坨</a>
 			</p>
 		</main>
 		<Footer />
