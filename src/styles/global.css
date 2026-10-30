@@ -90,8 +90,33 @@ textarea {
 input {
 	font-size: 16px;
 }
+/* 表格：表头底色 + 行分隔线 + 斑马纹（markdown 表格全靠这一段）
+   单元格的 text-align 由 markdown 的 :---: 决定，内联样式会覆盖这里的 left */
 table {
 	width: 100%;
+	border-collapse: collapse;
+	margin: 1.6em 0;
+	font-size: 0.94em;
+	line-height: 1.6;
+}
+th,
+td {
+	padding: 0.6em 0.9em;
+	border-bottom: 1px solid rgb(var(--gray-light));
+	text-align: left;
+	vertical-align: top;
+}
+thead th {
+	background: rgba(var(--gray-light), 55%);
+	border-bottom: 1px solid rgba(var(--gray), 30%);
+	color: rgb(var(--black));
+	font-weight: 700;
+}
+tbody tr:nth-child(even) {
+	background: rgba(var(--gray-light), 28%);
+}
+tbody tr:hover {
+	background: rgba(34, 211, 238, 12%);
 }
 img {
 	max-width: 100%;
@@ -130,12 +155,56 @@ hr {
 	border: none;
 	border-top: 1px solid rgb(var(--gray-light));
 }
+
+/* 脚注：跟正文之间拉一条细线隔开，整体缩小变灰；序号和「↩」回跳用青色 */
+.footnotes {
+	margin-top: 3em;
+	padding-top: 1.2em;
+	border-top: 1px solid rgb(var(--gray-light));
+	color: rgb(var(--gray));
+	font-size: 0.88em;
+	line-height: 1.7;
+}
+.footnotes ol {
+	margin: 0;
+	padding-left: 1.4em;
+}
+.footnotes li {
+	margin: 0.4em 0;
+}
+.footnotes li p {
+	margin: 0;
+}
+.footnotes a[data-footnote-backref] {
+	margin-left: 0.4em;
+	color: var(--accent-text);
+	font-size: 1.05em;
+	text-decoration: none;
+}
+sup a[data-footnote-ref] {
+	padding: 0 0.18em;
+	color: var(--accent-text);
+	font-weight: 700;
+	text-decoration: none;
+	border-radius: 3px;
+}
+sup a[data-footnote-ref]:hover {
+	background: rgba(34, 211, 238, 22%);
+}
 @media (max-width: 720px) {
 	body {
 		font-size: 16px;
 	}
 	main {
 		padding: 1em;
+	}
+	/* 窄屏表格收一档字号和内边距，避免挤成两行 */
+	table {
+		font-size: 0.86em;
+	}
+	th,
+	td {
+		padding: 0.5em 0.6em;
 	}
 	/* 触摸友好：标签胶囊加大点击区域 */
 	.tag {
