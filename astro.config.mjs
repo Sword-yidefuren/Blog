@@ -10,6 +10,8 @@ import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
 // https://astro.build/config
 export default defineConfig({
     site: 'https://blog-5yo.pages.dev',
+    // 悬停/进入视口就预取下一页，点进去几乎瞬开（静态站每页才几十 KB）
+    prefetch: { prefetchAll: true },
     integrations: [
         expressiveCode({
             plugins: [pluginLineNumbers()],
