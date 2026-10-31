@@ -18,9 +18,22 @@ export async function getStaticPaths() {
 }
 
 const { post, prev, next } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+
+// 文章目录：只取「主层 + 次层」。两个坑：
+// ① 脚注区会自动生成一个隐藏的「Footnotes」标题，得滤掉；
+// ② 正文小节是 h4、子小节是 h5，而开头那段导语是 h5、排在所有 h4 之前，
+//    所以按「该篇最浅层级 = 主层」归一，并把排在第一个主层标题之前的更深标题也当主层。
+const real = headings.filter((h) => h.text.trim().toLowerCase() !== 'footnotes');
+const mainDepth = real.length ? Math.min(...real.map((h) => h.depth)) : 0;
+const firstMain = real.findIndex((h) => h.depth === mainDepth);
+const toc = real.map((h, index) => ({
+	slug: h.slug,
+	text: h.text,
+	level: (h.depth === mainDepth || index < firstMain ? 1 : 2) as 1 | 2,
+}));
 ---
 
-<BlogPost {...post.data} body={post.body} prev={prev} next={next}>
+<BlogPost {...post.data} body={post.body} prev={prev} next={next} toc={toc}>
 	<Content />
 </BlogPost>

@@ -7,14 +7,19 @@ import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import { readingTime } from '../utils/readingTime';
 
+type TocItem = { slug: string; text: string; level: 1 | 2 };
+
 type Props = CollectionEntry<'blog'>['data'] & {
 	body?: string;
 	prev?: { id: string; title: string } | null;
 	next?: { id: string; title: string } | null;
+	toc?: TocItem[];
 };
 
-const { title, description, pubDate, updatedDate, heroImage, tags = [], prev, next } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, tags = [], prev, next, toc = [] } = Astro.props;
 const minutes = readingTime(Astro.props.body);
+// 太短的文章不放目录（默认 3 条起）
+const showToc = toc.length >= 3;
 ---
 
 <html lang="zh-CN">
@@ -53,8 +58,18 @@ const minutes = readingTime(Astro.props.body);
 				width: 750px;
 				max-width: calc(100% - 2em);
 				margin: auto;
-				padding: 1em;
+				padding: 0 1em 1em;
 				color: rgb(var(--gray-dark));
+			}
+			/* 标题块从 .prose 里拆出来，手机端目录才能插在「标题之后、正文之前」 */
+			.article-head {
+				width: 750px;
+				max-width: calc(100% - 2em);
+				margin: auto;
+				padding: 1em 1em 0;
+			}
+			.article-body {
+				display: block;
 			}
 			.title {
 				margin-bottom: 1em;
@@ -77,6 +92,118 @@ const minutes = readingTime(Astro.props.body);
 			.last-updated-on {
 				font-style: italic;
 			}
+
+			/* ---------- 文章目录 ---------- */
+			.toc {
+				width: 750px;
+				max-width: calc(100% - 2em);
+				margin: 1.4em auto;
+				padding: 0 1em;
+				font-size: 0.88em;
+			}
+			.toc details {
+				padding: 0.7em 1em;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 10px;
+				background: rgb(var(--header-bg));
+			}
+			.toc summary {
+				color: rgb(var(--gray-dark));
+				font-weight: 700;
+				line-height: 1.6;
+				cursor: pointer;
+			}
+			.toc summary::marker {
+				color: var(--accent);
+			}
+			.toc ol {
+				list-style: none;
+				margin: 0.5em 0 0.2em;
+				padding: 0;
+				border-left: 1px solid rgb(var(--gray-light));
+			}
+			.toc li a {
+				display: block;
+				margin-left: -1px;
+				padding: 0.35em 0 0.35em 0.9em;
+				border-left: 2px solid transparent;
+				color: rgb(var(--gray));
+				line-height: 1.5;
+				text-decoration: none;
+				transition: color 0.2s ease;
+			}
+			.toc li.lvl-2 a {
+				padding-left: 1.8em;
+				font-size: 0.94em;
+			}
+			.toc li a:hover {
+				color: var(--accent-text);
+			}
+			.toc li a.active {
+				border-left-color: var(--accent);
+				color: var(--accent-text);
+			}
+			/* 锚点跳转别被贴顶的标题挡住 */
+			.prose :is(h2, h3, h4, h5, h6) {
+				scroll-margin-top: 2em;
+			}
+
+			@media (min-width: 1120px) {
+				.article-body {
+					display: grid;
+					grid-template-columns: 782px 220px;
+					gap: 0 2.8em;
+					justify-content: center;
+					align-items: start;
+				}
+				.article-head {
+					grid-column: 1;
+					grid-row: 1;
+					width: auto;
+					max-width: none;
+					margin: 0;
+				}
+				.prose {
+					grid-column: 1;
+					grid-row: 2;
+					width: auto;
+					max-width: none;
+					margin: 0;
+				}
+				.toc {
+					grid-column: 2;
+					grid-row: 1 / span 2;
+					position: sticky;
+					top: 2.5em;
+					width: auto;
+					max-width: none;
+					margin: 3.6em 0 0;
+					padding: 0;
+					font-size: 0.82em;
+				}
+				.toc details {
+					padding: 0;
+					border: 0;
+					border-radius: 0;
+					background: none;
+				}
+				.toc summary {
+					display: none;
+				}
+				.toc ol {
+					margin: 0;
+				}
+				.toc li a {
+					padding-top: 0.4em;
+					padding-bottom: 0.4em;
+				}
+			}
+
+			@media print {
+				.toc {
+					display: none;
+				}
+			}
 		</style>
 	</head>
 
@@ -87,37 +214,56 @@ const minutes = readingTime(Astro.props.body);
 				<div class="hero-image">
 					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
 				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{minutes > 0 && (
-								<div class="reading-time">
-									约 {minutes} 分钟
-								</div>
-							)}
+				<div class="article-body">
+					<div class="article-head">
+						<div class="title">
+							<div class="date">
+								<FormattedDate date={pubDate} />
+								{minutes > 0 && (
+									<div class="reading-time">
+										约 {minutes} 分钟
+									</div>
+								)}
+								{
+									updatedDate && (
+										<div class="last-updated-on">
+											Last updated on <FormattedDate date={updatedDate} />
+										</div>
+									)
+								}
+							</div>
+							<h1>{title}</h1>
+							<hr />
 							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
+								tags.length > 0 && (
+									<div class="post-tags">
+										{tags.map((tag) => (
+											<a class="tag" href={`/tags/${tag}/`}>
+												{tag}
+											</a>
+										))}
 									</div>
 								)
 							}
 						</div>
-						<h1>{title}</h1>
-						<hr />
-						{
-							tags.length > 0 && (
-								<div class="post-tags">
-									{tags.map((tag) => (
-										<a class="tag" href={`/tags/${tag}/`}>
-											{tag}
-										</a>
-									))}
-								</div>
-							)
-						}
 					</div>
+					{
+						showToc && (
+							<aside class="toc" aria-label="文章目录">
+								<details open>
+									<summary>本文目录</summary>
+									<ol>
+										{toc.map((item) => (
+											<li class:list={[`lvl-${item.level}`]}>
+												<a href={`#${item.slug}`}>{item.text}</a>
+											</li>
+										))}
+									</ol>
+								</details>
+							</aside>
+						)
+					}
+					<div class="prose">
 					<slot />
 					{
 						(prev || next) && (
@@ -141,6 +287,7 @@ const minutes = readingTime(Astro.props.body);
 							</nav>
 						)
 					}
+					</div>
 				</div>
 			</article>
 		</main>
@@ -262,6 +409,52 @@ const minutes = readingTime(Astro.props.body);
 					lightbox = null;
 				}
 			});
+
+			// 文章目录：桌面固定展开，窄屏收进 <details>；滚动时高亮当前小节
+			const toc = document.querySelector('.toc');
+			const tocDetails = toc?.querySelector('details');
+			const wideToc = window.matchMedia('(min-width: 1120px)');
+			const syncTocOpen = () => {
+				if (tocDetails) tocDetails.open = wideToc.matches;
+			};
+			syncTocOpen();
+			wideToc.addEventListener('change', syncTocOpen);
+
+			const tocTargets = Array.from(toc?.querySelectorAll('a[href^="#"]') ?? [])
+				.map((link) => {
+					const id = decodeURIComponent(link.getAttribute('href').slice(1));
+					const heading = document.getElementById(id);
+					return heading ? { link, heading } : null;
+				})
+				.filter(Boolean);
+
+			if (tocTargets.length) {
+				let current = -1;
+				const markActive = () => {
+					let index = 0;
+					tocTargets.forEach((item, i) => {
+						if (item.heading.getBoundingClientRect().top <= 120) index = i;
+					});
+					if (index === current) return;
+					current = index;
+					tocTargets.forEach((item, i) => item.link.classList.toggle('active', i === index));
+				};
+
+				let queued = false;
+				window.addEventListener(
+					'scroll',
+					() => {
+						if (queued) return;
+						queued = true;
+						requestAnimationFrame(() => {
+							markActive();
+							queued = false;
+						});
+					},
+					{ passive: true },
+				);
+				markActive();
+			}
 		</script>
 	</body>
 </html>
