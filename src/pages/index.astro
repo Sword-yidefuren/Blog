@@ -60,15 +60,12 @@ const newestPost = posts[0];
 				background: var(--accent);
 				box-shadow: 0 0 0 4px rgba(34, 211, 238, 16%);
 			}
+			/* 大标题从中文句换成英文名，字号放大一档才撑得住，字距收紧一点 */
 			h1 {
-				margin: 0 0 0.55em;
-				font-size: clamp(2.1rem, 6vw, 3.2rem);
-				line-height: 1.18;
-				letter-spacing: -0.01em;
-			}
-			h1 .emoji {
-				margin-left: 0.08em;
-				font-size: 0.8em;
+				margin: 0 0 0.5em;
+				font-size: clamp(3rem, 8.5vw, 5.2rem);
+				line-height: 1.05;
+				letter-spacing: -0.025em;
 			}
 			.lede {
 				max-width: 33em;
@@ -376,9 +373,9 @@ const newestPost = posts[0];
 		<main>
 			<section class="hero">
 				<p class="kicker">学习 · 生活 · 工作</p>
-				<h1>一个菜B的练手<span class="emoji">😀</span></h1>
+				<h1>Sword</h1>
 				<p class="lede">
-					哈喽，我是 Sword，一个还在跟代码互相折磨的大二学生。这里记我学编程踩过的坑和最后的解法、跟着 AI 折腾的日常，还有生活里那些小事。
+					一个还在跟代码互相折磨的大二学生。这里记我学编程踩过的坑和最后的解法、跟着 AI 折腾的日常，还有生活里那些小事。
 				</p>
 				<div class="hero-actions">
 					<a class="btn btn-primary" href="/blog/">读点东西 →</a>
