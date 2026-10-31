@@ -1,24 +1,299 @@
 ---
-import AboutHeroImage from '../assets/blog-placeholder-about.jpg';
-import Layout from '../layouts/BlogPost.astro';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const email = 'lijianrui06@outlook.com';
+
+// 时间线素材来自《我的大学规划》那篇，月份由作者本人确认
+const timeline = [
+	{
+		when: '2025.06',
+		what: '高考完，志愿几乎全填了计算机。理由很朴素：<strong>我想玩电脑</strong>。',
+	},
+	{
+		when: '2025.08',
+		what: '在笔记本上写下一份四年规划：以终为始，从「毕业要能就业」往回倒推——实习 → 能力 → 竞赛和项目。',
+	},
+	{
+		when: '2025.09',
+		what: '大一开学。竞选学习委员落选，很气馁；同专业的人已经拿了全国竞赛一等奖、还拿到了实习。第一次意识到<strong>大家好像不一样</strong>。',
+	},
+	{
+		when: '2025 秋',
+		what: '燕兴杯练了好几天，连二课学分都没混到。转念先把绩点刷起来——刷得动的事先做掉。',
+	},
+	{
+		when: '2026.04',
+		what: '蓝桥杯，练了一个月，<strong>省二</strong>。',
+	},
+	{
+		when: '2026.07',
+		what: '暑假开始准备实习，简历磨了两个月。',
+	},
+	{
+		when: '2026.08',
+		what: '码蹄杯只拿了省三；学校是赛点、有直通国赛的名额，狠狠报上，<strong>拿了国二</strong>。',
+	},
+	{
+		when: '2026.09',
+		what: '找实习近一个月：两个面试、两个 offer，最后去了学校旁边的龙岗。同月 14 号写下第一篇博客。',
+	},
+	{
+		when: '2026.10',
+		what: '开始把这个站一点点改成自己的样子：首页、目录、图标、分享卡。',
+		now: true,
+	},
+];
 ---
 
-<Layout
-	title="关于我"
-	heroImage={AboutHeroImage}
-	description="关于我的介绍"
-	pubDate={new Date('2026-09-16')}
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead
+			title={`关于我 | ${SITE_TITLE}`}
+			description="Sword：计算机科学与技术大二在读，在深圳实习，也在这个小站记录自己怎么一点点长起来。"
+		/>
+		<style>
+			main {
+				width: 750px;
+				max-width: calc(100% - 2em);
+				margin: auto;
+				padding: 3.5em 1em 4em;
+			}
+			.intro {
+				display: flex;
+				align-items: center;
+				gap: 1.4em;
+				margin-bottom: 2.6em;
+			}
+			.avatar {
+				flex: none;
+				width: 104px;
+				height: 104px;
+			}
+			h1 {
+				margin: 0 0 0.4em;
+				font-size: clamp(2.2rem, 6vw, 3.4rem);
+				line-height: 1.05;
+				letter-spacing: -0.02em;
+			}
+			.meta {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.45em;
+				margin: 0;
+				color: rgb(var(--gray));
+				font-size: 0.86em;
+				line-height: 1.6;
+			}
+			.meta span[aria-hidden] {
+				opacity: 0.6;
+			}
+			p {
+				margin: 0 0 1.4em;
+				color: rgb(var(--gray-dark));
+			}
+			h2 {
+				display: flex;
+				align-items: center;
+				margin: 3em 0 0.2em;
+				padding-bottom: 0.7em;
+				border-bottom: 1px solid rgb(var(--gray-light));
+				font-size: 1.02em;
+				letter-spacing: 0.04em;
+			}
+			h2::before {
+				content: '';
+				width: 3px;
+				height: 0.92em;
+				margin-right: 0.6em;
+				border-radius: 2px;
+				background: var(--accent);
+			}
+			/* 时间线：左时间、右一句，中间细线 + 圆点 */
+			.timeline {
+				list-style: none;
+				margin: 1.6em 0 0;
+				padding: 0;
+			}
+			.timeline li {
+				position: relative;
+				display: grid;
+				grid-template-columns: 5.6em 1fr;
+				gap: 0 1.6em;
+				padding: 0.55em 0 0.55em 1.5em;
+				margin-left: 0.35em;
+				border-left: 1px solid rgb(var(--gray-light));
+			}
+			.timeline li::before {
+				content: '';
+				position: absolute;
+				left: -3.5px;
+				top: 1.35em;
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background: rgba(var(--gray), 55%);
+				box-shadow: 0 0 0 3px rgb(var(--header-bg));
+			}
+			.timeline li.now::before {
+				background: var(--accent);
+				box-shadow:
+					0 0 0 3px rgb(var(--header-bg)),
+					0 0 0 6px rgba(34, 211, 238, 18%);
+			}
+			.when {
+				padding-top: 0.18em;
+				color: rgb(var(--gray));
+				font-size: 0.84em;
+				font-variant-numeric: tabular-nums;
+				white-space: nowrap;
+			}
+			.what {
+				color: rgb(var(--gray-dark));
+				line-height: 1.7;
+			}
+			.contact {
+				display: grid;
+				grid-template-columns: max-content max-content;
+				gap: 0.7em;
+				margin-top: 1.4em;
+				justify-content: start;
+			}
+			.contact a {
+				display: inline-flex;
+				align-items: center;
+				padding: 0.55em 1.1em;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 999px;
+				font-size: 0.9em;
+				text-decoration: none;
+				transition:
+					border-color 0.2s ease,
+					color 0.2s ease;
+			}
+			.contact a:hover {
+				border-color: var(--accent);
+				color: var(--accent-text);
+			}
+			/* QQ / 微信没有可靠的网页跳转，做成「点一下复制」 */
+			.contact button {
+				padding: 0.55em 1.1em;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 999px;
+				background: none;
+				color: rgb(var(--gray-dark));
+				font: inherit;
+				font-size: 0.9em;
+				cursor: pointer;
+				transition:
+					border-color 0.2s ease,
+					color 0.2s ease;
+			}
+			.contact button:hover {
+				border-color: var(--accent);
+				color: var(--accent-text);
+			}
+			@media (max-width: 720px) {
+				main {
+					padding: 2em 1em 3em;
+				}
+				.intro {
+					gap: 1em;
+					margin-bottom: 2em;
+				}
+				.avatar {
+					width: 76px;
+					height: 76px;
+				}
+				.timeline li {
+					grid-template-columns: 1fr;
+					gap: 0.15em;
+				}
+				.timeline li::before {
+					top: 1.15em;
+				}
+				.contact {
+					grid-template-columns: 1fr;
+				}
+			}
+		</style>
+	</head>
 
->
-	<p>
-		你好，我是大帅逼Sword，一个正在学习编程、计算机技术的大二学生，这个网站的作者
-	</p>
+	<body>
+		<Header />
+		<main>
+			<div class="intro">
+				<img class="avatar" src="/favicon-line-192.png" alt="Sword 的线条小人" width="104" height="104" />
+				<div>
+					<h1>Sword</h1>
+					<p class="meta">
+						<span>计算机科学与技术 · 大二在读</span>
+						<span aria-hidden="true">·</span>
+						<span>深圳 · 实习中</span>
+						<span aria-hidden="true">·</span>
+						<span>在找前端 / 全栈实习</span>
+					</p>
+				</div>
+			</div>
 
-	<p>
-		额......为什么会想做这么一个博客网站呢？我想单纯是我想满足我自己的虚荣心吧，想让别人看到我写的东西，想让别人看到我的技术，想让别人看到我的生活，想让别人看到我的一切。其实我也不想让别人看到我的一切，我只是想让别人看到我这个人吧
-	</p>
+			<p>你好，我是 Sword。一个还在跟代码互相折磨的大二学生，也是这个站的作者。</p>
+			<p>
+				为什么要做这个站？说得直白点，是有点虚荣心：想让别人看到我写的东西、看到我学过什么、看到我在过什么日子。但也不全是——我更想给自己留一份记录，看我这个人是怎么一点点长起来的。
+			</p>
+			<p>所以我把它当成一个长期的东西来做。写得慢，但会一直写；改得细，但都改给自己觉得舒服的样子。</p>
 
-	<p>
-		我还有一个目标：记录我的成长——生活、学习、工作、情感？难说啦
-	</p>
-</Layout>
+			<h2>这两年，大概是这么走过来的</h2>
+			<ul class="timeline">
+				{
+					timeline.map((item) => (
+						<li class:list={[{ now: item.now }]}>
+							<span class="when">{item.when}</span>
+							<span class="what" set:html={item.what} />
+						</li>
+					))
+				}
+			</ul>
+
+			<h2>现在</h2>
+			<p>
+				白天在公司做网页部署和软件开发，晚上回来补课、写点东西。技术上还差得远，但至少知道每天该往哪儿使劲了。
+			</p>
+			<p>如果你想聊聊，或者有实习机会，可以直接找我。</p>
+			<div class="contact">
+				<a href="https://github.com/Sword-yidefuren" target="_blank" rel="noreferrer">
+					GitHub · Sword-yidefuren
+				</a>
+				<a href={`mailto:${email}`}>{email}</a>
+				<button type="button" data-copy="2281567400" title="点击复制 QQ 号">QQ · 2281567400</button>
+				<button type="button" data-copy="jr482453001" title="点击复制微信号">微信 · jr482453001</button>
+			</div>
+		</main>
+		<Footer />
+		<script>
+			// QQ / 微信点一下复制：微信没有可用的网页添加好友链接，QQ 深链在桌面端也不可靠
+			document.querySelectorAll('.contact [data-copy]').forEach((btn) => {
+				btn.addEventListener('click', async () => {
+					const value = btn.dataset.copy ?? '';
+					const label = btn.textContent;
+					try {
+						await navigator.clipboard.writeText(value);
+					} catch {
+						// 非 https 或没权限时退化成选中文字，用户自己 Ctrl+C
+						const range = document.createRange();
+						range.selectNodeContents(btn);
+						const selection = window.getSelection();
+						selection?.removeAllRanges();
+						selection?.addRange(range);
+					}
+					btn.textContent = `已复制 ${value}`;
+					window.setTimeout(() => {
+						btn.textContent = label;
+					}, 1500);
+				});
+			});
+		</script>
+	</body>
+</html>
