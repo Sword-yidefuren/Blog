@@ -13,12 +13,13 @@ const latest = posts.slice(0, 4);
 // 首页只露最近几篇；年份久远也不至于误读，这里保持「月日」的轻量写法
 const shortDate = (date: Date) => `${date.getMonth() + 1} 月 ${date.getDate()} 日`;
 
-type TagName = '生活' | '学习' | '工作';
+type TagName = '生活' | '学习' | '工作' | '心情';
 
 const topics: { name: TagName; note: string; count: number }[] = [
 	{ name: '学习', note: '笔记、踩坑、跟着 AI 学新东西', count: 0 },
-	{ name: '生活', note: '日常、情绪、偶尔的碎碎念', count: 0 },
+	{ name: '生活', note: '日常、碎碎念、偶尔的情绪', count: 0 },
 	{ name: '工作', note: '实习、求职、做项目的过程', count: 0 },
+	{ name: '心情', note: '当下在想什么、被什么绊住', count: 0 },
 ].map((topic) => ({
 	...topic,
 	count: posts.filter((post) => post.data.tags.includes(topic.name)).length,
@@ -218,8 +219,8 @@ const newestPost = posts[0];
 			/* ---------- 按主题逛 ---------- */
 			.topics {
 				display: grid;
-				grid-template-columns: repeat(3, 1fr);
-				gap: 0.9em;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 0.8em;
 				list-style: none;
 				margin: 1.1em 0 0;
 				padding: 0;
@@ -232,7 +233,7 @@ const newestPost = posts[0];
 				flex: 1;
 				flex-direction: column;
 				gap: 0.5em;
-				padding: 1.1em 1.2em;
+				padding: 1em 1em;
 				border: 1px solid rgb(var(--gray-light));
 				border-radius: 12px;
 				background: rgb(var(--header-bg));
