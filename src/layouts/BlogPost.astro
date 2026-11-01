@@ -199,8 +199,60 @@ const showToc = toc.length >= 3;
 				}
 			}
 
+			/* ---------- 阅读进度条 ---------- */
+			.read-progress {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 2px;
+				background: var(--accent);
+				transform: scaleX(0);
+				transform-origin: 0 50%;
+				z-index: 40;
+			}
+
+			/* ---------- 字号调节 ---------- */
+			.read-tools {
+				position: fixed;
+				right: 1.2em;
+				bottom: 4.4em;
+				display: flex;
+				gap: 0.3em;
+				z-index: 10;
+			}
+			.read-tools button {
+				width: 2.2em;
+				height: 2.2em;
+				padding: 0;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 50%;
+				background: var(--header-bg);
+				color: rgb(var(--gray));
+				font: inherit;
+				font-size: 0.82em;
+				line-height: 1;
+				cursor: pointer;
+				transition: 0.2s ease;
+			}
+			.read-tools button:hover:not(:disabled) {
+				border-color: var(--accent);
+				color: var(--accent-text);
+			}
+			.read-tools button:disabled {
+				opacity: 0.35;
+				cursor: default;
+			}
+
+			/* 字号调节只作用在正文，标题不动 */
+			.prose {
+				font-size: calc(1em * var(--reading-size, 1));
+			}
+
 			@media print {
-				.toc {
+				.toc,
+				.read-progress,
+				.read-tools {
 					display: none;
 				}
 			}
@@ -208,6 +260,7 @@ const showToc = toc.length >= 3;
 	</head>
 
 	<body>
+		<div class="read-progress" aria-hidden="true"></div>
 		<Header />
 		<main>
 			<article>
@@ -291,6 +344,10 @@ const showToc = toc.length >= 3;
 				</div>
 			</article>
 		</main>
+		<div class="read-tools" role="group" aria-label="字号调节">
+			<button type="button" data-step="-1" aria-label="字号调小" title="字号调小">A−</button>
+			<button type="button" data-step="1" aria-label="字号调大" title="字号调大">A+</button>
+		</div>
 		<Footer />
 		<script>
 			// 阅读续读：按滚动比例记录/恢复每篇文章的阅读进度
@@ -455,6 +512,65 @@ const showToc = toc.length >= 3;
 				);
 				markActive();
 			}
+
+			// 阅读进度条：滚到哪儿，顶上那根青线就走到哪儿
+			const progressBar = document.querySelector('.read-progress');
+			if (progressBar) {
+				let progressQueued = false;
+				const syncProgress = () => {
+					const max = document.documentElement.scrollHeight - window.innerHeight;
+					const ratio = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+					progressBar.style.transform = `scaleX(${ratio})`;
+				};
+				window.addEventListener(
+					'scroll',
+					() => {
+						if (progressQueued) return;
+						progressQueued = true;
+						requestAnimationFrame(() => {
+							syncProgress();
+							progressQueued = false;
+						});
+					},
+					{ passive: true },
+				);
+				window.addEventListener('resize', syncProgress);
+				syncProgress();
+			}
+
+			// 字号调节：0.9 / 1 / 1.1 / 1.2 倍，记在 localStorage
+			const sizeSteps = [0.9, 1, 1.1, 1.2];
+			const sizeKey = 'readsize';
+			let sizeIndex = 1;
+			try {
+				const savedIndex = sizeSteps.indexOf(Number(localStorage.getItem(sizeKey)));
+				if (savedIndex >= 0) sizeIndex = savedIndex;
+			} catch {
+				/* 存储不可用就用默认字号 */
+			}
+
+			const sizeButtons = document.querySelectorAll('.read-tools [data-step]');
+			const applySize = () => {
+				document.documentElement.style.setProperty('--reading-size', String(sizeSteps[sizeIndex]));
+				sizeButtons.forEach((btn) => {
+					const step = Number(btn.dataset.step);
+					btn.disabled = step < 0 ? sizeIndex === 0 : sizeIndex === sizeSteps.length - 1;
+				});
+			};
+
+			sizeButtons.forEach((btn) => {
+				btn.addEventListener('click', () => {
+					const step = Number(btn.dataset.step);
+					sizeIndex = Math.min(sizeSteps.length - 1, Math.max(0, sizeIndex + step));
+					applySize();
+					try {
+						localStorage.setItem(sizeKey, String(sizeSteps[sizeIndex]));
+					} catch {
+						/* 忽略 */
+					}
+				});
+			});
+			applySize();
 		</script>
 	</body>
 </html>
