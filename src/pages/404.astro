@@ -2,11 +2,12 @@
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
 ---
 
 <html lang="zh-CN">
 	<head>
-		<BaseHead title="页面走丢了 | 我的小站" description="这个页面不存在" />
+		<BaseHead title={`页面走丢了 | ${SITE_TITLE}`} description="这个页面不存在" />
 		<style>
 			h1 {
 				font-size: 4em;
