@@ -1,0 +1,98 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { readingTime } from '../utils/readingTime';
+
+interface Props {
+	posts: CollectionEntry<'blog'>[];
+	showReadingTime?: boolean;
+}
+
+const { posts, showReadingTime = true } = Astro.props;
+
+const shortDate = (date: Date) => `${date.getMonth() + 1} 月 ${date.getDate()} 日`;
+---
+
+<ul class:list={['posts', { 'with-time': showReadingTime }]}>
+	{
+		posts.map((post) => (
+			<li>
+				<a href={`/blog/${post.id}/`}>
+					<time class="when" datetime={post.data.pubDate.toISOString()}>
+						{shortDate(post.data.pubDate)}
+					</time>
+					<span>
+						<span class="title">{post.data.title}</span>
+						<span class="desc">{post.data.description}</span>
+					</span>
+					{showReadingTime && <span class="mins">{readingTime(post.body)} 分钟</span>}
+				</a>
+			</li>
+		))
+	}
+</ul>
+
+<style>
+	.posts {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.posts li + li {
+		border-top: 1px solid rgb(var(--gray-light));
+	}
+	.posts a {
+		display: grid;
+		grid-template-columns: 5.4em 1fr;
+		gap: 0 1.4em;
+		align-items: baseline;
+		padding: 1.05em 0;
+		text-decoration: none;
+	}
+	.posts.with-time a {
+		grid-template-columns: 5.4em 1fr 4.2em;
+	}
+	.when {
+		color: rgb(var(--gray));
+		font-size: 0.8em;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+	.title {
+		display: block;
+		color: rgb(var(--black));
+		font-size: 1.06em;
+		font-weight: 700;
+		line-height: 1.45;
+		transition: color 0.2s ease;
+	}
+	.desc {
+		display: -webkit-box;
+		overflow: hidden;
+		margin: 0.3em 0 0;
+		color: rgb(var(--gray));
+		font-size: 0.88em;
+		line-height: 1.6;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 1;
+	}
+	.mins {
+		color: rgb(var(--gray));
+		font-size: 0.78em;
+		text-align: right;
+		white-space: nowrap;
+	}
+	.posts a:hover .title,
+	.posts a:hover .when {
+		color: var(--accent-text);
+	}
+	@media (max-width: 720px) {
+		.posts a {
+			grid-template-columns: 1fr;
+			gap: 0.25em;
+			padding: 0.95em 0;
+		}
+		.mins {
+			display: none;
+		}
+	}
+</style>

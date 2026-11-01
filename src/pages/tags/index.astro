@@ -2,11 +2,13 @@
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import PostList from '../../components/PostList.astro';
+import { SITE_TITLE } from '../../consts';
 
 const posts = await getCollection('blog');
+
+// 按标签分组；组内按时间倒序，组间按篇数从多到少
 const groups = new Map<string, typeof posts>();
 for (const post of posts) {
 	for (const tag of post.data.tags) {
@@ -23,118 +25,83 @@ const sections = [...groups.entries()]
 	.sort((a, b) => b.posts.length - a.posts.length || a.tag.localeCompare(b.tag, 'zh-CN'));
 ---
 
+<!doctype html>
 <html lang="zh-CN">
 	<head>
-		<BaseHead title={`标签 | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		<BaseHead title={`标签 | ${SITE_TITLE}`} description="按标签浏览所有文章" />
 		<style>
-			h1 {
-				margin-bottom: 1em;
+			main {
+				width: 820px;
+				padding: 3em 1em 3.5em;
 			}
-			.index {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 0.8em;
-				list-style: none;
-				margin: 0;
-				padding: 0;
-			}
-			.index a {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.4em;
-				padding: 0.35em 0.9em;
-				border: 1px solid rgba(34, 211, 238, 50%);
-				border-radius: 999px;
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			.index a:hover {
-				background: var(--accent);
-				border-color: var(--accent);
-				color: #082f33;
-			}
-			.count {
-				color: rgb(var(--gray));
-				font-size: 0.8em;
-			}
-			.index a:hover .count {
-				color: #082f33;
-			}
-			.tag-group {
-				margin-top: 2.5em;
-				scroll-margin-top: 4em;
-			}
-			.tag-group h2 {
-				display: flex;
-				align-items: center;
-				gap: 0.6em;
-				margin: 0 0 0.6em;
-				font-size: 1.3em;
-			}
-			.posts {
-				list-style: none;
-				margin: 0;
-				padding: 0;
-			}
-			.posts li {
+			.list-head {
 				display: flex;
 				align-items: baseline;
 				justify-content: space-between;
 				gap: 1em;
-				padding: 0.5em 0;
+				margin: 0 0 0.4em;
+				padding-bottom: 0.75em;
 				border-bottom: 1px solid rgb(var(--gray-light));
 			}
-			.posts li:last-child {
-				border-bottom: 0;
+			.list-head h1 {
+				margin: 0;
+				font-size: 1.02em;
+				font-weight: 700;
+				letter-spacing: 0.04em;
 			}
-			.posts a {
+			.list-head span {
+				color: rgb(var(--gray));
+				font-size: 0.84em;
+			}
+			.tag-group {
+				margin-top: 2.4em;
+			}
+			.tag-group h2 {
+				display: flex;
+				align-items: baseline;
+				gap: 0.6em;
+				margin: 0;
+				padding-bottom: 0.6em;
+				border-bottom: 1px solid rgb(var(--gray-light));
+				font-size: 1.06em;
+			}
+			.tag-group h2 a {
 				text-decoration: none;
 			}
-			.posts a:hover {
+			.tag-group h2 a:hover {
 				color: var(--accent-text);
 			}
-			.posts .date {
+			.tag-group .count {
 				color: rgb(var(--gray));
-				font-size: 0.85em;
-				white-space: nowrap;
+				font-size: 0.8em;
+				font-weight: 400;
+			}
+			@media (max-width: 720px) {
+				main {
+					padding: 2em 1em 2.5em;
+				}
+				.list-head {
+					flex-wrap: wrap;
+					gap: 0.3em;
+				}
 			}
 		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>标签</h1>
-			<ul class="index">
-				{
-					sections.map(({ tag, posts }) => (
-						<li>
-							<a href={`#tag-${tag}`}>
-								{tag}
-								<span class="count">{posts.length}</span>
-							</a>
-						</li>
-					))
-				}
-			</ul>
+			<div class="list-head">
+				<h1>标签</h1>
+				<span>{sections.length} 个标签 · {posts.length} 篇文章</span>
+			</div>
 			{
-				sections.map(({ tag, posts }) => (
-					<section class="tag-group" id={`tag-${tag}`}>
+				sections.map((section) => (
+					<section class="tag-group">
 						<h2>
-							<a class="tag" href={`/tags/${tag}/`}>
-								{tag}
-							</a>
-							<span class="count">{posts.length} 篇</span>
+							<a href={`/tags/${section.tag}/`}>{section.tag}</a>
+							<span class="count">{section.posts.length} 篇</span>
 						</h2>
-						<ul class="posts">
-							{posts.map((post) => (
-								<li>
-									<a href={`/blog/${post.id}/`}>{post.data.title}</a>
-									<span class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</span>
-								</li>
-							))}
-						</ul>
+						<PostList posts={section.posts} />
 					</section>
 				))
 			}

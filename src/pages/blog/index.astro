@@ -3,14 +3,13 @@ import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
+import PostList from '../../components/PostList.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
-import { readingTime } from '../../utils/readingTime';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
-const shortDate = (date: Date) => `${date.getMonth() + 1} 月 ${date.getDate()} 日`;
 const firstPost = posts.at(-1);
 ---
 
@@ -28,7 +27,7 @@ const firstPost = posts.at(-1);
 				align-items: baseline;
 				justify-content: space-between;
 				gap: 1em;
-				margin: 0 0 0.4em;
+				margin: 0 0 1.2em;
 				padding-bottom: 0.75em;
 				border-bottom: 1px solid rgb(var(--gray-light));
 			}
@@ -42,56 +41,6 @@ const firstPost = posts.at(-1);
 				color: rgb(var(--gray));
 				font-size: 0.84em;
 			}
-			.posts {
-				list-style: none;
-				margin: 0;
-				padding: 0;
-			}
-			.posts li + li {
-				border-top: 1px solid rgb(var(--gray-light));
-			}
-			.posts a {
-				display: grid;
-				grid-template-columns: 5.4em 1fr 4.2em;
-				gap: 0 1.4em;
-				align-items: baseline;
-				padding: 1.05em 0;
-				text-decoration: none;
-			}
-			.when {
-				color: rgb(var(--gray));
-				font-size: 0.8em;
-				font-variant-numeric: tabular-nums;
-				white-space: nowrap;
-			}
-			.title {
-				display: block;
-				color: rgb(var(--black));
-				font-size: 1.06em;
-				font-weight: 700;
-				line-height: 1.45;
-				transition: color 0.2s ease;
-			}
-			.desc {
-				display: -webkit-box;
-				overflow: hidden;
-				margin: 0.3em 0 0;
-				color: rgb(var(--gray));
-				font-size: 0.88em;
-				line-height: 1.6;
-				-webkit-box-orient: vertical;
-				-webkit-line-clamp: 1;
-			}
-			.mins {
-				color: rgb(var(--gray));
-				font-size: 0.78em;
-				text-align: right;
-				white-space: nowrap;
-			}
-			.posts a:hover .title,
-			.posts a:hover .when {
-				color: var(--accent-text);
-			}
 			@media (max-width: 720px) {
 				main {
 					padding: 2em 1em 2.5em;
@@ -99,14 +48,6 @@ const firstPost = posts.at(-1);
 				.list-head {
 					flex-wrap: wrap;
 					gap: 0.3em;
-				}
-				.posts a {
-					grid-template-columns: 1fr;
-					gap: 0.25em;
-					padding: 0.95em 0;
-				}
-				.mins {
-					display: none;
 				}
 			}
 		</style>
@@ -121,24 +62,7 @@ const firstPost = posts.at(-1);
 					{firstPost ? firstPost.data.pubDate.getMonth() + 1 : ''} 月开始
 				</span>
 			</div>
-			<ul class="posts">
-				{
-					posts.map((post) => (
-						<li>
-							<a href={`/blog/${post.id}/`}>
-								<time class="when" datetime={post.data.pubDate.toISOString()}>
-									{shortDate(post.data.pubDate)}
-								</time>
-								<span>
-									<span class="title">{post.data.title}</span>
-									<span class="desc">{post.data.description}</span>
-								</span>
-								<span class="mins">{readingTime(post.body)} 分钟</span>
-							</a>
-						</li>
-					))
-				}
-			</ul>
+			<PostList posts={posts} />
 		</main>
 		<Footer />
 	</body>
