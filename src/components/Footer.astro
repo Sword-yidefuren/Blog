@@ -1,9 +1,26 @@
 ---
 const today = new Date();
+
+// 页脚每次刷新随机一句；没有 JS 时固定显示第一句
+const lines = [
+	'今天也谢谢你翻到这里',
+	'院子不大，慢慢逛',
+	'这里不常有新东西，但每次都是真的',
+	'写的时候很认真，看得时候随意就好',
+	'鼠标可以歇一会儿了',
+	'有想法，QQ 或微信找我就行',
+	'天黑了就开深色模式吧',
+	'下一篇文章还在脑子里排队',
+	'能读到页脚，说明你是真朋友',
+	'祝你今天不加班，或者少加一点',
+	'这里只有一个人在写，和一个人在等',
+	'好了，该去干正事了',
+];
 ---
 
 <footer>
-	&copy; {today.getFullYear()} Sword. All rights reserved.
+	<p class="line" id="footer-line" data-lines={JSON.stringify(lines)}>{lines[0]}</p>
+	<p class="copyright">&copy; {today.getFullYear()} Sword</p>
 	<div class="social-links">
 		<a href="https://github.com/Sword-yidefuren" target="_blank">
 			<span class="sr-only">哥的GitHub仓库</span>
@@ -23,6 +40,17 @@ const today = new Date();
 		color: rgb(var(--gray));
 		text-align: center;
 	}
+	.line {
+		margin: 0 0 0.4em;
+		min-height: 1.6em;
+		color: rgb(var(--gray-dark));
+		font-size: 0.86em;
+	}
+	.copyright {
+		margin: 0;
+		color: rgb(var(--gray));
+		font-size: 0.76em;
+	}
 	.social-links {
 		display: flex;
 		justify-content: center;
@@ -37,3 +65,17 @@ const today = new Date();
 		color: rgb(var(--gray-dark));
 	}
 </style>
+<script>
+	// 页脚随机句：每次刷新换一句（没 JS 时保留构建时那句）
+	const footerLine = document.getElementById('footer-line');
+	if (footerLine) {
+		try {
+			const pool = JSON.parse(footerLine.dataset.lines || '[]');
+			if (Array.isArray(pool) && pool.length > 1) {
+				footerLine.textContent = pool[Math.floor(Math.random() * pool.length)];
+			}
+		} catch {
+			/* 数据坏了就保持原句 */
+		}
+	}
+</script>

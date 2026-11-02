@@ -148,54 +148,126 @@ const showToc = toc.length >= 3;
 				scroll-margin-top: 2em;
 			}
 
-			@media (min-width: 1120px) {
-				.article-body {
-					display: grid;
-					grid-template-columns: 782px 220px;
-					gap: 0 2.8em;
-					justify-content: center;
-					align-items: start;
+			/* ---------- 左侧刻度目录 ---------- */
+			.toc-tick {
+				display: none;
+				position: fixed;
+				left: calc(50% - 375px - 76px);
+				top: 50%;
+				transform: translateY(-50%);
+				z-index: 20;
+			}
+			.toc-tick ol {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				display: flex;
+				flex-direction: column;
+				align-items: flex-end;
+				gap: 10px;
+				position: relative;
+			}
+			/* 轨道：一条极淡的竖线，刻度从它向左伸出 */
+			.toc-tick ol::after {
+				content: '';
+				position: absolute;
+				right: 0;
+				top: 1px;
+				bottom: 1px;
+				width: 1px;
+				background: rgb(var(--gray-light));
+			}
+			.toc-tick li {
+				position: relative;
+				z-index: 1;
+			}
+			.toc-tick a {
+				display: flex;
+				align-items: center;
+				justify-content: flex-end;
+				position: relative;
+			}
+			.tick {
+				display: block;
+				height: 2px;
+				border-radius: 2px;
+				background: rgb(var(--gray-light));
+				transition:
+					width 0.2s ease,
+					background 0.2s ease;
+			}
+			.lvl-1 .tick {
+				width: 16px;
+			}
+			.lvl-2 .tick {
+				width: 10px;
+			}
+			.toc-tick a:hover .tick,
+			.toc-tick a.active .tick {
+				background: var(--accent);
+			}
+			.lvl-1 a.active .tick {
+				width: 20px;
+			}
+			.lvl-2 a.active .tick {
+				width: 14px;
+			}
+			/* 悬停/聚焦才浮出标题 */
+			.toc-tick .label {
+				position: absolute;
+				right: 100%;
+				margin-right: 12px;
+				padding: 0.2em 0.6em;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 8px;
+				background: var(--header-bg);
+				color: rgb(var(--gray-dark));
+				font-size: 0.76em;
+				line-height: 1.6;
+				white-space: nowrap;
+				opacity: 0;
+				transform: translateX(4px);
+				transition:
+					opacity 0.18s ease,
+					transform 0.18s ease;
+				pointer-events: none;
+			}
+			.toc-tick a:hover .label,
+			.toc-tick a:focus-visible .label {
+				opacity: 1;
+				transform: none;
+			}
+			/* 小球：跳到当前小节对应的刻度上 */
+			.toc-tick .ball {
+				position: absolute;
+				right: -3px;
+				top: 0;
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background: var(--accent);
+				box-shadow: 0 0 0 3px rgba(34, 211, 238, 14%);
+				transform: translateY(0);
+				transition: transform 0.3s ease;
+				pointer-events: none;
+			}
+			@media (prefers-reduced-motion: reduce) {
+				.toc-tick .ball {
+					transition: none;
 				}
-				.article-head {
-					grid-column: 1;
-					grid-row: 1;
-					width: auto;
-					max-width: none;
-					margin: 0;
-				}
-				.prose {
-					grid-column: 1;
-					grid-row: 2;
-					width: auto;
-					max-width: none;
-					margin: 0;
-				}
+			}
+
+			/* 宽屏才启用刻度目录：正文回到单列居中，刻度浮在左侧留白里；
+			   同时撤掉顶部进度条，任何宽度下只留一个进度指示 */
+			@media (min-width: 1200px) {
 				.toc {
-					grid-column: 2;
-					grid-row: 1 / span 2;
-					position: sticky;
-					top: 2.5em;
-					width: auto;
-					max-width: none;
-					margin: 3.6em 0 0;
-					padding: 0;
-					font-size: 0.82em;
-				}
-				.toc details {
-					padding: 0;
-					border: 0;
-					border-radius: 0;
-					background: none;
-				}
-				.toc summary {
 					display: none;
 				}
-				.toc ol {
-					margin: 0;
+				.toc-tick {
+					display: block;
 				}
-				.toc li a {
-					padding-top: 0.4em;
-					padding-bottom: 0.4em;
+				.read-progress {
+					display: none;
 				}
 			}
 
@@ -314,6 +386,25 @@ const showToc = toc.length >= 3;
 									</ol>
 								</details>
 							</aside>
+						)
+					}
+					{
+						showToc && (
+							<nav class="toc-tick" aria-label="文章目录（刻度）">
+								<ol>
+									{toc.map((item) => (
+										<li class:list={[`lvl-${item.level}`]}>
+											<a href={`#${item.slug}`} aria-label={`跳到：${item.text}`}>
+												<span class="tick" aria-hidden="true" />
+												<span class="label" aria-hidden="true">
+													{item.text}
+												</span>
+											</a>
+										</li>
+									))}
+								</ol>
+								<span class="ball" aria-hidden="true" />
+							</nav>
 						)
 					}
 					<div class="prose">
@@ -467,34 +558,51 @@ const showToc = toc.length >= 3;
 				}
 			});
 
-			// 文章目录：桌面固定展开，窄屏收进 <details>；滚动时高亮当前小节
+			// 文章目录：窄屏用 <details> 折叠文字版，宽屏用左侧刻度 + 滑动小球
 			const toc = document.querySelector('.toc');
 			const tocDetails = toc?.querySelector('details');
-			const wideToc = window.matchMedia('(min-width: 1120px)');
+			const wideToc = window.matchMedia('(min-width: 1200px)');
 			const syncTocOpen = () => {
-				if (tocDetails) tocDetails.open = wideToc.matches;
+				if (tocDetails) tocDetails.open = !wideToc.matches;
 			};
 			syncTocOpen();
 			wideToc.addEventListener('change', syncTocOpen);
 
-			const tocTargets = Array.from(toc?.querySelectorAll('a[href^="#"]') ?? [])
-				.map((link) => {
-					const id = decodeURIComponent(link.getAttribute('href').slice(1));
-					const heading = document.getElementById(id);
-					return heading ? { link, heading } : null;
-				})
-				.filter(Boolean);
+			const tocTick = document.querySelector('.toc-tick');
+			const tocBall = tocTick?.querySelector('.ball');
 
-			if (tocTargets.length) {
-				let current = -1;
+			const tocLinks = Array.from(
+				document.querySelectorAll('.toc a[href^="#"], .toc-tick a[href^="#"]'),
+			)
+				.map((link) => ({
+					link,
+					id: decodeURIComponent(link.getAttribute('href').slice(1)),
+				}))
+				.filter((item) => document.getElementById(item.id));
+
+			// 同一小节可能在两套目录里各有链接，按 id 去重后统一处理
+			const tocIds = [...new Set(tocLinks.map((item) => item.id))];
+
+			if (tocIds.length) {
+				let currentId = '';
 				const markActive = () => {
-					let index = 0;
-					tocTargets.forEach((item, i) => {
-						if (item.heading.getBoundingClientRect().top <= 120) index = i;
+					let activeId = tocIds[0];
+					tocIds.forEach((id) => {
+						const heading = document.getElementById(id);
+						if (heading && heading.getBoundingClientRect().top <= 120) activeId = id;
 					});
-					if (index === current) return;
-					current = index;
-					tocTargets.forEach((item, i) => item.link.classList.toggle('active', i === index));
+					if (activeId === currentId) return;
+					currentId = activeId;
+					tocLinks.forEach(({ link, id }) => link.classList.toggle('active', id === activeId));
+
+					// 小球跳到当前刻度上
+					const activeLink = Array.from(tocTick?.querySelectorAll('a') ?? []).find(
+						(link) => decodeURIComponent(link.getAttribute('href').slice(1)) === activeId,
+					);
+					if (tocBall && activeLink) {
+						const top = activeLink.parentElement.offsetTop + activeLink.offsetHeight / 2 - 3;
+						tocBall.style.transform = `translateY(${top}px)`;
+					}
 				};
 
 				let queued = false;
@@ -510,6 +618,7 @@ const showToc = toc.length >= 3;
 					},
 					{ passive: true },
 				);
+				window.addEventListener('resize', markActive);
 				markActive();
 			}
 
