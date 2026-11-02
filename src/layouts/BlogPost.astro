@@ -55,6 +55,7 @@ const showToc = toc.length >= 3;
 				box-shadow: var(--box-shadow);
 			}
 			.prose {
+				position: relative;
 				width: 750px;
 				max-width: calc(100% - 2em);
 				margin: auto;
@@ -237,22 +238,29 @@ const showToc = toc.length >= 3;
 				opacity: 1;
 				transform: none;
 			}
-			/* 小球：跳到当前小节对应的刻度上 */
-			.toc-tick .ball {
+			/* 小球：贴在当前小节标题的左边，小节切换时跳过去 */
+			.heading-ball {
+				display: none;
 				position: absolute;
-				right: -3px;
+				left: 0;
 				top: 0;
 				width: 6px;
 				height: 6px;
 				border-radius: 50%;
 				background: var(--accent);
-				box-shadow: 0 0 0 3px rgba(34, 211, 238, 14%);
+				box-shadow: 0 0 0 3px rgba(34, 211, 238, 12%);
 				transform: translateY(0);
-				transition: transform 0.3s ease;
+				transition: transform 0.28s ease;
 				pointer-events: none;
+				z-index: 2;
+			}
+			@media (min-width: 1200px) {
+				.heading-ball {
+					display: block;
+				}
 			}
 			@media (prefers-reduced-motion: reduce) {
-				.toc-tick .ball {
+				.heading-ball {
 					transition: none;
 				}
 			}
@@ -403,11 +411,11 @@ const showToc = toc.length >= 3;
 										</li>
 									))}
 								</ol>
-								<span class="ball" aria-hidden="true" />
 							</nav>
 						)
 					}
 					<div class="prose">
+					{showToc && <span class="heading-ball" aria-hidden="true" />}
 					<slot />
 					{
 						(prev || next) && (
@@ -558,7 +566,7 @@ const showToc = toc.length >= 3;
 				}
 			});
 
-			// 文章目录：窄屏用 <details> 折叠文字版，宽屏用左侧刻度 + 滑动小球
+			// 文章目录：窄屏用 <details> 折叠文字版，宽屏用左侧刻度；小球贴在正文标题旁
 			const toc = document.querySelector('.toc');
 			const tocDetails = toc?.querySelector('details');
 			const wideToc = window.matchMedia('(min-width: 1200px)');
@@ -568,8 +576,7 @@ const showToc = toc.length >= 3;
 			syncTocOpen();
 			wideToc.addEventListener('change', syncTocOpen);
 
-			const tocTick = document.querySelector('.toc-tick');
-			const tocBall = tocTick?.querySelector('.ball');
+			const headingBall = document.querySelector('.heading-ball');
 
 			const tocLinks = Array.from(
 				document.querySelectorAll('.toc a[href^="#"], .toc-tick a[href^="#"]'),
@@ -585,24 +592,35 @@ const showToc = toc.length >= 3;
 
 			if (tocIds.length) {
 				let currentId = '';
+
+				// 小球停在当前小节标题的左边
+				const moveBall = (id) => {
+					if (!headingBall) return;
+					const heading = document.getElementById(id);
+					const prose = heading?.closest('.prose');
+					if (!heading || !prose) return;
+					// 用 rect 差算相对 .prose 的坐标，比 offsetTop 稳（不受 offsetParent 影响）
+					const top =
+						heading.getBoundingClientRect().top -
+						prose.getBoundingClientRect().top +
+						heading.offsetHeight / 2 -
+						3;
+					headingBall.style.transform = `translateY(${top}px)`;
+				};
+
 				const markActive = () => {
+					// 判定线在视口中线：标题滚过一半，就算"当前小节"
+					const anchorY = window.innerHeight / 2;
 					let activeId = tocIds[0];
 					tocIds.forEach((id) => {
 						const heading = document.getElementById(id);
-						if (heading && heading.getBoundingClientRect().top <= 120) activeId = id;
+						if (heading && heading.getBoundingClientRect().top <= anchorY) activeId = id;
 					});
-					if (activeId === currentId) return;
-					currentId = activeId;
-					tocLinks.forEach(({ link, id }) => link.classList.toggle('active', id === activeId));
-
-					// 小球跳到当前刻度上
-					const activeLink = Array.from(tocTick?.querySelectorAll('a') ?? []).find(
-						(link) => decodeURIComponent(link.getAttribute('href').slice(1)) === activeId,
-					);
-					if (tocBall && activeLink) {
-						const top = activeLink.parentElement.offsetTop + activeLink.offsetHeight / 2 - 3;
-						tocBall.style.transform = `translateY(${top}px)`;
+					if (activeId !== currentId) {
+						currentId = activeId;
+						tocLinks.forEach(({ link, id }) => link.classList.toggle('active', id === activeId));
 					}
+					moveBall(activeId);
 				};
 
 				let queued = false;
@@ -619,6 +637,9 @@ const showToc = toc.length >= 3;
 					{ passive: true },
 				);
 				window.addEventListener('resize', markActive);
+				// 字体加载完位置会变，重新量一次
+				window.addEventListener('load', markActive);
+				document.fonts?.ready.then(markActive);
 				markActive();
 			}
 
