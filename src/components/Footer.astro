@@ -20,7 +20,16 @@ const lines = [
 
 <footer>
 	<p class="line" id="footer-line" data-lines={JSON.stringify(lines)}>{lines[0]}</p>
-	<p class="copyright">&copy; {today.getFullYear()} Sword</p>
+	<p class="copyright"
+		>&copy; {today.getFullYear()} Sword<button
+			type="button"
+			id="sound-toggle"
+			class="sound-toggle"
+			aria-pressed="false"
+			aria-label="声音开关"
+			title="声音：关"><span class="note">♪</span></button
+		></p
+	>
 	<div class="social-links">
 		<a href="https://github.com/Sword-yidefuren" target="_blank">
 			<span class="sr-only">哥的GitHub仓库</span>
@@ -51,6 +60,70 @@ const lines = [
 		color: rgb(var(--gray));
 		font-size: 0.76em;
 	}
+	/* 声音开关：关着时一道斜线，开着转青 */
+	.sound-toggle {
+		position: relative;
+		display: inline-grid;
+		place-items: center;
+		width: 1.9em;
+		height: 1.9em;
+		margin-left: 0.45em;
+		padding: 0;
+		vertical-align: middle;
+		font-family: inherit;
+		font-size: 1em;
+		line-height: 1;
+		color: rgb(var(--gray));
+		background: transparent;
+		border: 1px solid transparent;
+		border-radius: 50%;
+		cursor: pointer;
+		transition:
+			color 0.2s ease,
+			border-color 0.2s ease;
+	}
+	.sound-toggle .note {
+		display: block;
+		transform: translateY(-0.02em);
+		transition:
+			transform 0.25s cubic-bezier(0.2, 0.8, 0.3, 1),
+			opacity 0.2s ease;
+	}
+	.sound-toggle::after {
+		content: '';
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		width: 1px;
+		height: 1.15em;
+		background: currentColor;
+		transform: translate(-50%, -50%) rotate(45deg);
+		opacity: 0.75;
+		transition:
+			opacity 0.2s ease,
+			transform 0.25s cubic-bezier(0.2, 0.8, 0.3, 1);
+	}
+	.sound-toggle:hover {
+		color: rgb(var(--gray-dark));
+		border-color: rgb(var(--gray-light));
+	}
+	.sound-toggle[aria-pressed='true'] {
+		color: var(--accent-text);
+	}
+	.sound-toggle[aria-pressed='true']::after {
+		opacity: 0;
+		transform: translate(-50%, -50%) rotate(45deg) scale(0.4);
+	}
+	.sound-toggle[aria-pressed='true'] .note {
+		transform: translateY(-0.08em) scale(1.06);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.sound-toggle,
+		.sound-toggle .note,
+		.sound-toggle::after {
+			transition: none;
+		}
+	}
 	.social-links {
 		display: flex;
 		justify-content: center;
@@ -66,6 +139,8 @@ const lines = [
 	}
 </style>
 <script>
+	import { mountSoundToggle } from '../scripts/sound';
+
 	// 页脚随机句：每次刷新换一句（没 JS 时保留构建时那句）
 	const footerLine = document.getElementById('footer-line');
 	if (footerLine) {
@@ -78,4 +153,7 @@ const lines = [
 			/* 数据坏了就保持原句 */
 		}
 	}
+
+	const soundToggle = document.getElementById('sound-toggle');
+	if (soundToggle instanceof HTMLButtonElement) mountSoundToggle(soundToggle);
 </script>

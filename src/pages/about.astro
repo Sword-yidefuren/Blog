@@ -273,13 +273,17 @@ const timeline = [
 		</main>
 		<Footer />
 		<script>
+			import { playCue } from '../scripts/sound';
+
 			// QQ / 微信点一下复制：微信没有可用的网页添加好友链接，QQ 深链在桌面端也不可靠
 			document.querySelectorAll('.contact [data-copy]').forEach((btn) => {
 				btn.addEventListener('click', async () => {
 					const value = btn.dataset.copy ?? '';
 					const label = btn.textContent;
+					let copied = false;
 					try {
 						await navigator.clipboard.writeText(value);
+						copied = true;
 					} catch {
 						// 非 https 或没权限时退化成选中文字，用户自己 Ctrl+C
 						const range = document.createRange();
@@ -288,6 +292,8 @@ const timeline = [
 						selection?.removeAllRanges();
 						selection?.addRange(range);
 					}
+					// 只有真复制成功才响；退化成选中文字时不出声
+					if (copied) playCue('copy');
 					btn.textContent = `已复制 ${value}`;
 					window.setTimeout(() => {
 						btn.textContent = label;

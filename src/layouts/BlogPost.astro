@@ -480,6 +480,8 @@ const showToc = toc.length >= 3;
 		</div>
 		<Footer />
 		<script>
+			import { playCue } from '../scripts/sound';
+
 			// 阅读续读：按滚动比例记录/恢复每篇文章的阅读进度
 			const key = `readpos:${location.pathname}`;
 			const store = {
@@ -556,18 +558,41 @@ const showToc = toc.length >= 3;
 				window.setTimeout(() => toast.remove(), 6000);
 			}
 
-			// 回到顶部按钮：滚过一屏后出现
+			// 回到顶部按钮：滚过一屏出现，滚到最底部时 ↑ 变成一个小圆点
 			const backTop = document.createElement('button');
 			backTop.type = 'button';
 			backTop.className = 'back-to-top';
 			backTop.setAttribute('aria-label', '回到顶部');
-			backTop.textContent = '↑';
+			const arrow = document.createElement('span');
+			arrow.className = 'bt-arrow';
+			arrow.setAttribute('aria-hidden', 'true');
+			arrow.textContent = '↑';
+			const dot = document.createElement('span');
+			dot.className = 'bt-dot';
+			dot.setAttribute('aria-hidden', 'true');
+			backTop.append(arrow, dot);
 			document.body.appendChild(backTop);
-			const syncBackTop = () => backTop.classList.toggle('show', window.scrollY > 600);
-			window.addEventListener('scroll', syncBackTop, { passive: true });
+
+			const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+			let backTopFrame = 0;
+			const syncBackTop = () => {
+				backTopFrame = 0;
+				const max = document.documentElement.scrollHeight - window.innerHeight;
+				const ratio = max > 0 ? window.scrollY / max : 0;
+				backTop.classList.toggle('show', window.scrollY > 600);
+				backTop.classList.toggle('at-bottom', max > 0 && ratio >= 0.98);
+			};
+			// 一帧最多算一次，不跟着每个 scroll 事件读布局
+			const queueBackTop = () => {
+				if (backTopFrame) return;
+				backTopFrame = requestAnimationFrame(syncBackTop);
+			};
+			window.addEventListener('scroll', queueBackTop, { passive: true });
+			window.addEventListener('resize', queueBackTop);
 			syncBackTop();
 			backTop.addEventListener('click', () => {
-				window.scrollTo({ top: 0, behavior: 'smooth' });
+				playCue('top');
+				window.scrollTo({ top: 0, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
 			});
 
 			// 图片灯箱：点正文里的图片放大，点任意处或 Esc 关闭
