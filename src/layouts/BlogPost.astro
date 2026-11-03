@@ -558,29 +558,52 @@ const showToc = toc.length >= 3;
 				window.setTimeout(() => toast.remove(), 6000);
 			}
 
-			// 回到顶部按钮：滚过一屏出现，滚到最底部时 ↑ 变成一个小圆点
+			// 回到顶部按钮：滚过一屏出现；第一次滚到最底部时涨成圆形鲸鱼娘循环图，之后一直保留
 			const backTop = document.createElement('button');
 			backTop.type = 'button';
 			backTop.className = 'back-to-top';
 			backTop.setAttribute('aria-label', '回到顶部');
+			backTop.title = '回到顶部';
 			const arrow = document.createElement('span');
 			arrow.className = 'bt-arrow';
 			arrow.setAttribute('aria-hidden', 'true');
 			arrow.textContent = '↑';
-			const dot = document.createElement('span');
-			dot.className = 'bt-dot';
-			dot.setAttribute('aria-hidden', 'true');
-			backTop.append(arrow, dot);
+			const whale = document.createElement('img');
+			whale.className = 'bt-whale';
+			whale.alt = '';
+			whale.setAttribute('aria-hidden', 'true');
+			whale.decoding = 'async';
+			backTop.append(arrow, whale);
 			document.body.appendChild(backTop);
 
 			const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+			// 快到底时才下载；开了「减弱动态效果」就只显示首帧，不播动画
+			const WHALE_ANIM = '/images/ui/whale-loop-v1.webp';
+			const WHALE_STILL = '/images/ui/whale-loop-v1.png';
+			let whaleLoaded = false;
+			let whaleShown = false;
+			const loadWhale = () => {
+				if (whaleLoaded) return;
+				whaleLoaded = true;
+				whale.src = reducedMotion.matches ? WHALE_STILL : WHALE_ANIM;
+			};
+
 			let backTopFrame = 0;
 			const syncBackTop = () => {
 				backTopFrame = 0;
 				const max = document.documentElement.scrollHeight - window.innerHeight;
 				const ratio = max > 0 ? window.scrollY / max : 0;
 				backTop.classList.toggle('show', window.scrollY > 600);
-				backTop.classList.toggle('at-bottom', max > 0 && ratio >= 0.98);
+				// 到底一次就长期保留：回滚也不收回、不停
+				if (!whaleShown) {
+					if (max > 0 && ratio >= 0.98) {
+						whaleShown = true;
+						loadWhale();
+						backTop.classList.add('is-whale');
+					} else if (max > 0 && ratio > 0.5) {
+						loadWhale();
+					}
+				}
 			};
 			// 一帧最多算一次，不跟着每个 scroll 事件读布局
 			const queueBackTop = () => {

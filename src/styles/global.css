@@ -419,10 +419,20 @@ html[data-theme='dark'] body {
 	font-family: inherit;
 	font-size: 1rem;
 	cursor: pointer;
+	overflow: hidden;
 	opacity: 0;
 	visibility: hidden;
 	transform: translateY(8px);
-	transition: 0.2s ease;
+	transition:
+		opacity 0.2s ease,
+		transform 0.2s ease,
+		visibility 0.2s,
+		background 0.2s ease,
+		border-color 0.25s ease,
+		color 0.2s ease,
+		box-shadow 0.25s ease,
+		width 0.32s cubic-bezier(0.2, 0.8, 0.3, 1),
+		height 0.32s cubic-bezier(0.2, 0.8, 0.3, 1);
 	z-index: 10;
 }
 .back-to-top.show {
@@ -435,39 +445,49 @@ html[data-theme='dark'] body {
 	border-color: var(--accent);
 	color: #082f33;
 }
-/* 箭头和圆点叠在同一格：到底时 ↑ 缩上去淡出，8px 圆点放大淡入 */
+/* 箭头和鲸鱼叠在同一格：到底时箭头缩上去淡出，鲸鱼娘放大淡入 */
 .back-to-top .bt-arrow,
-.back-to-top .bt-dot {
+.back-to-top .bt-whale {
 	grid-area: 1 / 1;
 	display: block;
 	transition:
-		opacity 0.2s ease,
-		transform 0.25s cubic-bezier(0.2, 0.8, 0.3, 1);
+		opacity 0.22s ease,
+		transform 0.28s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 .back-to-top .bt-arrow {
 	font-size: 1rem;
 	line-height: 1;
 }
-.back-to-top .bt-dot {
-	width: 8px;
-	height: 8px;
-	border-radius: 50%;
-	background: currentColor;
+.back-to-top .bt-whale {
+	width: 100%;
+	height: 100%;
 	opacity: 0;
-	transform: scale(0.2);
+	transform: scale(0.7);
 }
-.back-to-top.at-bottom .bt-arrow {
+/* 到底过一次就长期是这个样子：88px 圆，里面循环放鲸鱼娘 */
+.back-to-top.is-whale {
+	width: 5.5em;
+	height: 5.5em;
+	border-color: rgba(34, 211, 238, 55%);
+	box-shadow: 0 2px 14px rgba(15, 23, 42, 12%);
+}
+.back-to-top.is-whale:hover {
+	background: var(--header-bg);
+	border-color: var(--accent);
+	color: var(--accent-text);
+}
+.back-to-top.is-whale .bt-arrow {
 	opacity: 0;
-	transform: translateY(-5px) scale(0.55);
+	transform: scale(0.6);
 }
-.back-to-top.at-bottom .bt-dot {
+.back-to-top.is-whale .bt-whale {
 	opacity: 1;
 	transform: scale(1);
 }
 @media (prefers-reduced-motion: reduce) {
 	.back-to-top,
 	.back-to-top .bt-arrow,
-	.back-to-top .bt-dot {
+	.back-to-top .bt-whale {
 		transition: none;
 	}
 }
