@@ -1,0 +1,169 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+// 先按年、再按月分组；组内顺序就是上面的倒序，不再重排
+const years = new Map<number, Map<number, typeof posts>>();
+for (const post of posts) {
+	const date = post.data.pubDate;
+	const year = date.getFullYear();
+	const month = date.getMonth() + 1;
+	const months = years.get(year) ?? new Map<number, typeof posts>();
+	const list = months.get(month) ?? [];
+	list.push(post);
+	months.set(month, list);
+	years.set(year, months);
+}
+const archive = [...years.entries()].map(([year, months]) => ({
+	year,
+	count: [...months.values()].reduce((sum, list) => sum + list.length, 0),
+	months: [...months.entries()].map(([month, list]) => ({ month, posts: list })),
+}));
+
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`归档 | ${SITE_TITLE}`} description="按年月浏览所有文章" />
+		<style>
+			main {
+				width: 820px;
+				padding: 3em 1em 3.5em;
+			}
+			.list-head {
+				display: flex;
+				align-items: baseline;
+				justify-content: space-between;
+				gap: 1em;
+				margin: 0 0 0.4em;
+				padding-bottom: 0.75em;
+				border-bottom: 1px solid rgb(var(--gray-light));
+			}
+			.list-head h1 {
+				margin: 0;
+				font-size: 1.02em;
+				font-weight: 700;
+				letter-spacing: 0.04em;
+			}
+			.list-head span {
+				color: rgb(var(--gray));
+				font-size: 0.84em;
+			}
+			.year {
+				margin-top: 2.4em;
+			}
+			.year > h2 {
+				display: flex;
+				align-items: baseline;
+				gap: 0.6em;
+				margin: 0;
+				padding-bottom: 0.6em;
+				border-bottom: 1px solid rgb(var(--gray-light));
+				font-size: 1.06em;
+			}
+			.year > h2 .count {
+				color: rgb(var(--gray));
+				font-size: 0.8em;
+				font-weight: 400;
+			}
+			.month {
+				display: grid;
+				grid-template-columns: 4.6em 1fr;
+				gap: 0.9em;
+				padding: 0.95em 0;
+				border-bottom: 1px solid rgb(var(--gray-light));
+			}
+			.month-label {
+				color: rgb(var(--gray));
+				font-size: 0.86em;
+				padding-top: 0.1em;
+				white-space: nowrap;
+			}
+			.month ul {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+			.month li + li {
+				margin-top: 0.35em;
+			}
+			.month a {
+				display: flex;
+				gap: 0.8em;
+				color: rgb(var(--gray-dark));
+				text-decoration: none;
+			}
+			.month a:hover .t {
+				color: var(--accent-text);
+			}
+			.month .d {
+				color: rgb(var(--gray));
+				font-size: 0.86em;
+				min-width: 3.1em;
+				font-variant-numeric: tabular-nums;
+			}
+			.month .t {
+				transition: color 0.2s ease;
+			}
+			@media (max-width: 720px) {
+				main {
+					padding: 2em 1em 2.5em;
+				}
+				.month {
+					grid-template-columns: 3.4em 1fr;
+					gap: 0.7em;
+				}
+				.month a {
+					flex-direction: column;
+					gap: 0.05em;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="list-head">
+				<h1>归档</h1>
+				<span>按年月 · 共 {posts.length} 篇</span>
+			</div>
+			{
+				archive.map((group) => (
+					<section class="year">
+						<h2>
+							{group.year}
+							<span class="count">{group.count} 篇</span>
+						</h2>
+						{group.months.map((block) => (
+							<div class="month">
+								<span class="month-label">{block.month} 月</span>
+								<ul>
+									{block.posts.map((post) => (
+										<li>
+											<a href={`/blog/${post.id}/`}>
+												<span class="d">
+													{pad(post.data.pubDate.getMonth() + 1)}-{pad(post.data.pubDate.getDate())}
+												</span>
+												<span class="t">{post.data.title}</span>
+											</a>
+										</li>
+									))}
+								</ul>
+							</div>
+						))}
+					</section>
+				))
+			}
+		</main>
+		<Footer />
+	</body>
+</html>
