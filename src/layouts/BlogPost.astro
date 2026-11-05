@@ -93,6 +93,47 @@ const showToc = toc.length >= 3;
 			.last-updated-on {
 				font-style: italic;
 			}
+			/* 面包屑：首页 / 文章 / 当前标题 */
+			.crumbs {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: baseline;
+				gap: 0.45em;
+				margin: 0 0 1.1em;
+				font-size: 0.78em;
+				color: rgb(var(--gray));
+			}
+			.crumbs a {
+				color: rgb(var(--gray));
+				text-decoration: none;
+			}
+			.crumbs a:hover {
+				color: var(--accent-text);
+			}
+			.crumbs span[aria-hidden] {
+				opacity: 0.5;
+			}
+			.crumbs .current {
+				max-width: 24em;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			/* 标题锚点：默认淡淡的一个 #（手机上也要看得见，触屏没有悬停），悬停/聚焦才变实 */
+			.head-anchor {
+				margin-left: 0.4em;
+				font-weight: 400;
+				font-size: 0.8em;
+				color: rgb(var(--gray));
+				text-decoration: none;
+				opacity: 0.3;
+				transition: opacity 0.2s ease;
+			}
+			.prose :is(h2, h3, h4, h5):hover .head-anchor,
+			.head-anchor:hover,
+			.head-anchor:focus-visible {
+				opacity: 1;
+			}
 
 			/* ---------- 文章目录 ---------- */
 			.toc {
@@ -343,6 +384,13 @@ const showToc = toc.length >= 3;
 				</div>
 				<div class="article-body">
 					<div class="article-head">
+						<nav class="crumbs" aria-label="面包屑">
+							<a href="/">首页</a>
+							<span aria-hidden="true">/</span>
+							<a href="/blog">文章</a>
+							<span aria-hidden="true">/</span>
+							<span class="current" aria-current="page">{title}</span>
+						</nav>
 						<div class="title">
 							<div class="date">
 								<FormattedDate date={pubDate} />
@@ -354,7 +402,7 @@ const showToc = toc.length >= 3;
 								{
 									updatedDate && (
 										<div class="last-updated-on">
-											Last updated on <FormattedDate date={updatedDate} />
+											最后更新于 <FormattedDate date={updatedDate} />
 										</div>
 									)
 								}
@@ -725,6 +773,35 @@ const showToc = toc.length >= 3;
 			} catch {
 				/* 存储不可用就算了 */
 			}
+
+			// 标题锚点：给每个带 id 的标题补一个 #，点了复制「跳到这一节」的链接
+			document.querySelectorAll('.prose :is(h2, h3, h4, h5)[id]').forEach((heading) => {
+				if (heading.querySelector('.head-anchor')) return;
+				const id = heading.id;
+				const label = (heading.textContent ?? '').trim();
+				const link = document.createElement('a');
+				link.className = 'head-anchor';
+				link.href = `#${id}`;
+				link.textContent = '#';
+				link.title = '复制这一节的链接';
+				link.setAttribute('aria-label', `复制「${label}」这一节的链接`);
+				link.addEventListener('click', async (event) => {
+					event.preventDefault();
+					const url = `${location.origin}${location.pathname}#${encodeURIComponent(id)}`;
+					try {
+						await navigator.clipboard.writeText(url);
+						playCue('copy');
+						link.textContent = '✓';
+						window.setTimeout(() => {
+							link.textContent = '#';
+						}, 1200);
+					} catch {
+						// 复制不了（非 https 或没权限）就老老实实跳过去
+						location.hash = id;
+					}
+				});
+				heading.append(link);
+			});
 		</script>
 	</body>
 </html>

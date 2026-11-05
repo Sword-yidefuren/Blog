@@ -77,6 +77,21 @@ a {
 a:hover {
 	color: var(--accent-text);
 }
+/* 选中文字染成淡青；不覆盖文字颜色，深色模式下也不会糊 */
+::selection {
+	background: rgba(34, 211, 238, 28%);
+}
+/* 系统开了「减少动效」：全站过渡、动画、平滑滚动一起关掉，各组件里零散的覆盖可以留，这里是兜底 */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
 p {
 	margin-bottom: 1.2em;
 }
