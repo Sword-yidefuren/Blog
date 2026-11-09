@@ -11,11 +11,16 @@ interface Props {
 	title: string;
 	description: string;
 	image?: ImageMetadata;
+	/** 文章专属分享图的公开路径，例如 /images/og/2026-11-09.jpg；给了就优先用它 */
+	ogImage?: string;
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
-const { title, description, image = FallbackImage } = Astro.props;
+const { title, description, image = FallbackImage, ogImage } = Astro.props;
+const ogImageURL = ogImage ? new URL(ogImage, Astro.site) : new URL(image.src, Astro.url);
+const ogImageWidth = ogImage ? 1200 : image.width;
+const ogImageHeight = ogImage ? 630 : image.height;
 ---
 
 <!-- 主题初始化：在首屏渲染前设置 html[data-theme]，避免深色模式闪白 -->
@@ -63,10 +68,11 @@ const { title, description, image = FallbackImage } = Astro.props;
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:site_name" content={SITE_TITLE} />
-<meta property="og:image" content={new URL(image.src, Astro.url)} />
-<meta property="og:image:width" content={String(image.width)} />
-<meta property="og:image:height" content={String(image.height)} />
+<meta property="og:image" content={ogImageURL} />
+<meta property="og:image:width" content={String(ogImageWidth)} />
+<meta property="og:image:height" content={String(ogImageHeight)} />
 <meta property="og:image:alt" content={title} />
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content={ogImageURL} />

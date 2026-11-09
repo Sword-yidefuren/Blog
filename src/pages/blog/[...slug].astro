@@ -34,6 +34,6 @@ const toc = real.map((h, index) => ({
 }));
 ---
 
-<BlogPost {...post.data} body={post.body} prev={prev} next={next} toc={toc}>
+<BlogPost {...post.data} id={post.id} body={post.body} prev={prev} next={next} toc={toc}>
 	<Content />
 </BlogPost>
