@@ -1,4 +1,4 @@
----
+﻿---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import { existsSync } from 'node:fs';
@@ -581,11 +581,11 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 			document.body.appendChild(backTop);
 
 			const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-			// 视频全长 36.6s（没有剪、没有裁），滚到 90% 就触发；开了「减弱动态效果」只显示首帧
+			// 只取视频第一段（0–9.8s，12fps 118 帧，329KB），滚到 90% 触发；开了「减弱动态效果」只显示首帧
 			const WHALE_AT = 0.9;
 			const WHALE_PREFETCH = WHALE_AT - 0.3;
-			const WHALE_ANIM = '/images/ui/whale-loop-v2.webp';
-			const WHALE_STILL = '/images/ui/whale-loop-v2.jpg';
+			const WHALE_ANIM = '/images/ui/whale-loop-v3.webp';
+			const WHALE_STILL = '/images/ui/whale-loop-v3.jpg';
 			let whaleLoaded = false;
 			let whaleShown = false;
 			const loadWhale = () => {
@@ -771,3 +771,4 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 		</script>
 	</body>
 </html>
+
