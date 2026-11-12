@@ -126,21 +126,7 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 				text-overflow: ellipsis;
 				white-space: nowrap;
 			}
-			/* 标题锚点：默认淡淡的一个 #（手机上也要看得见，触屏没有悬停），悬停/聚焦才变实 */
-			.head-anchor {
-				margin-left: 0.4em;
-				font-weight: 400;
-				font-size: 0.8em;
-				color: rgb(var(--gray));
-				text-decoration: none;
-				opacity: 0.3;
-				transition: opacity 0.2s ease;
-			}
-			.prose :is(h2, h3, h4, h5):hover .head-anchor,
-			.head-anchor:hover,
-			.head-anchor:focus-visible {
-				opacity: 1;
-			}
+			/* 标题锚点在 2026-11-12 去掉了：点了只是复制链接，实际没人用，反而在标题后挂个 # 碍眼 */
 
 			/* ---------- 文章目录 ---------- */
 			.toc {
@@ -782,35 +768,6 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 			} catch {
 				/* 存储不可用就算了 */
 			}
-
-			// 标题锚点：给每个带 id 的标题补一个 #，点了复制「跳到这一节」的链接
-			document.querySelectorAll('.prose :is(h2, h3, h4, h5)[id]').forEach((heading) => {
-				if (heading.querySelector('.head-anchor')) return;
-				const id = heading.id;
-				const label = (heading.textContent ?? '').trim();
-				const link = document.createElement('a');
-				link.className = 'head-anchor';
-				link.href = `#${id}`;
-				link.textContent = '#';
-				link.title = '复制这一节的链接';
-				link.setAttribute('aria-label', `复制「${label}」这一节的链接`);
-				link.addEventListener('click', async (event) => {
-					event.preventDefault();
-					const url = `${location.origin}${location.pathname}#${encodeURIComponent(id)}`;
-					try {
-						await navigator.clipboard.writeText(url);
-						playCue('copy');
-						link.textContent = '✓';
-						window.setTimeout(() => {
-							link.textContent = '#';
-						}, 1200);
-					} catch {
-						// 复制不了（非 https 或没权限）就老老实实跳过去
-						location.hash = id;
-					}
-				});
-				heading.append(link);
-			});
 		</script>
 	</body>
 </html>
