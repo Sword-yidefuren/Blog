@@ -4,6 +4,7 @@ import HeaderLink from './HeaderLink.astro';
 ---
 
 <header>
+	<a class="skip-link" href="#main">跳到正文</a>
 	<nav>
 		<h2><a href="/">{SITE_TITLE}</a></h2>
 		<div class="internal-links" id="site-nav">
@@ -59,6 +60,24 @@ import HeaderLink from './HeaderLink.astro';
 	</nav>
 </header>
 <style>
+	/* 键盘用户的第一个 Tab：直接跳过导航进正文，平时藏起来 */
+	.skip-link {
+		position: absolute;
+		left: 1em;
+		top: -3.2em;
+		padding: 0.45em 0.9em;
+		border: 1px solid var(--accent);
+		border-radius: 8px;
+		background: var(--header-bg);
+		color: var(--accent-text);
+		font-size: 0.85em;
+		text-decoration: none;
+		z-index: 100;
+		transition: top 0.2s ease;
+	}
+	.skip-link:focus-visible {
+		top: 0.6em;
+	}
 	header {
 		position: relative;
 		margin: 0;

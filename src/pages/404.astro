@@ -1,4 +1,4 @@
----
+﻿---
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
@@ -41,7 +41,7 @@ import { SITE_TITLE } from '../consts';
 	</head>
 	<body>
 		<Header />
-		<main>
+		<main id="main" tabindex="-1">
 			<h1>404</h1>
 			<p>这页不存在——要么我改坏了（划掉），要么你点错了链接，要么它从来没存在过。</p>
 			<p class="panic">别慌，下面是出口。</p>
@@ -54,3 +54,4 @@ import { SITE_TITLE } from '../consts';
 		<Footer />
 	</body>
 </html>
+

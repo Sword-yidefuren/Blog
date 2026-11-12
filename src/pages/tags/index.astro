@@ -1,4 +1,4 @@
----
+﻿---
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
@@ -89,7 +89,7 @@ const sections = [...groups.entries()]
 	</head>
 	<body>
 		<Header />
-		<main>
+		<main id="main" tabindex="-1">
 			<div class="list-head">
 				<h1>标签</h1>
 				<span>{sections.length} 个标签 · {posts.length} 篇文章</span>
@@ -109,3 +109,4 @@ const sections = [...groups.entries()]
 		<Footer />
 	</body>
 </html>
+

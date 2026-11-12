@@ -1,4 +1,4 @@
----
+﻿---
 import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
@@ -371,7 +371,7 @@ const newestPost = posts[0];
 	</head>
 	<body>
 		<Header />
-		<main>
+		<main id="main" tabindex="-1">
 			<section class="hero">
 				<p class="kicker">学习 · 生活 · 工作</p>
 				<h1>Sword</h1>
@@ -472,3 +472,4 @@ const newestPost = posts[0];
 		<Footer />
 	</body>
 </html>
+

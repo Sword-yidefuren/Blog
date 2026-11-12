@@ -370,7 +370,7 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 	<body>
 		<div class="read-progress" aria-hidden="true"></div>
 		<Header />
-		<main>
+		<main id="main" tabindex="-1">
 			<article>
 				<div class="hero-image">
 					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
@@ -771,4 +771,5 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 		</script>
 	</body>
 </html>
+
 

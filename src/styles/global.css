@@ -17,6 +17,8 @@
 	--box-shadow:
 		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%),
 		0 16px 32px rgba(var(--gray), 33%);
+	/* 让原生滚动条、表单控件跟着主题走 */
+	color-scheme: light;
 }
 body {
 	font-family: 'Atkinson', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Source Han Sans SC', 'Noto Sans SC', sans-serif;
@@ -80,6 +82,32 @@ a:hover {
 /* 选中文字染成淡青；不覆盖文字颜色，深色模式下也不会糊 */
 ::selection {
 	background: rgba(34, 211, 238, 28%);
+}
+/* 键盘焦点：只在键盘操作时出现一圈青边，鼠标点击不打扰 */
+:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+	border-radius: 3px;
+}
+/* 细一点的滚动条，颜色跟主题走（Firefox 用 scrollbar-*，Chrome/Safari 用 ::-webkit-*） */
+html {
+	scrollbar-width: thin;
+	scrollbar-color: rgb(var(--gray-light)) transparent;
+}
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	border: 2px solid transparent;
+	border-radius: 999px;
+	background: rgb(var(--gray-light)) content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: rgb(var(--gray)) content-box;
 }
 /* 系统开了「减少动效」：全站过渡、动画、平滑滚动一起关掉，各组件里零散的覆盖可以留，这里是兜底 */
 @media (prefers-reduced-motion: reduce) {
@@ -276,6 +304,11 @@ sup a[data-footnote-ref]:hover {
 	--box-shadow:
 		0 2px 6px rgba(0, 0, 0, 40%), 0 8px 24px rgba(0, 0, 0, 45%),
 		0 16px 32px rgba(0, 0, 0, 45%);
+	color-scheme: dark;
+}
+/* 深色下把正文图片压暗一点，免得白底截图在暗背景上刺眼 */
+html[data-theme='dark'] .prose img {
+	filter: brightness(0.94);
 }
 html[data-theme='dark'] body {
 	/* nebula 星云紫：深紫黑底 + 顶部紫光弥散 + 右上青辉 + 底部暗紫回光 */
@@ -504,5 +537,63 @@ html[data-theme='dark'] body {
 	.back-to-top .bt-arrow,
 	.back-to-top .bt-whale {
 		transition: none;
+	}
+}
+
+/* ---------- 打印：只留正文，去掉一切界面 ---------- */
+@media print {
+	header,
+	footer,
+	.skip-link,
+	.toc,
+	.toc-tick,
+	.read-progress,
+	.back-to-top,
+	.heading-ball,
+	.post-nav,
+	.post-tags,
+	.lightbox,
+	.read-resume-toast {
+		display: none !important;
+	}
+	html,
+	body {
+		background: #fff !important;
+		color: #000 !important;
+		font-size: 11pt;
+		line-height: 1.6;
+	}
+	main,
+	.article-head,
+	.prose {
+		width: auto !important;
+		max-width: none !important;
+		margin: 1em 0 !important;
+		padding: 0 !important;
+	}
+	a {
+		color: #000 !important;
+		text-decoration: underline;
+	}
+	/* 外链把网址打在括号里，纸上也能追到 */
+	.prose a[href^='http']::after {
+		content: ' (' attr(href) ')';
+		font-size: 0.82em;
+		color: #444;
+		word-break: break-all;
+	}
+	figure,
+	img,
+	pre,
+	table,
+	blockquote {
+		break-inside: avoid;
+	}
+	h1,
+	h2,
+	h3,
+	h4,
+	h5 {
+		break-after: avoid;
 	}
 }
