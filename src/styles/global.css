@@ -445,9 +445,6 @@ html[data-theme='dark'] body {
 .share-action[data-done='true'] {
 	color: var(--accent-text);
 }
-.share-count {
-	font-variant-numeric: tabular-nums;
-}
 
 /* 上一篇 / 下一篇 */
 .post-nav {
@@ -638,4 +635,5 @@ html[data-theme='dark'] body {
 		break-after: avoid;
 	}
 }
+
 
