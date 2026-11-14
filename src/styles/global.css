@@ -409,6 +409,42 @@ html[data-theme='dark'] body {
 	box-shadow: 0 20px 60px rgba(0, 0, 0, 55%);
 }
 
+/* 分享：文章末尾一行，不加数字、不加图标 */
+.share-row {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.6em;
+	width: 750px;
+	max-width: calc(100% - 2em);
+	margin: 2.2em auto 0;
+	padding: 1.3em 1em 0;
+	border-top: 1px solid rgb(var(--gray-light));
+}
+.share-label {
+	color: rgb(var(--gray));
+	font-size: 0.82em;
+}
+.share-btn {
+	padding: 0.34em 0.9em;
+	border: 1px solid rgb(var(--gray-light));
+	border-radius: 999px;
+	background: transparent;
+	color: rgb(var(--gray-dark));
+	font-family: inherit;
+	font-size: 0.82em;
+	cursor: pointer;
+	transition: 0.2s ease;
+}
+.share-btn:hover {
+	border-color: var(--accent);
+	color: var(--accent-text);
+}
+.share-btn[data-done='true'] {
+	border-color: var(--accent);
+	color: var(--accent-text);
+}
+
 /* 上一篇 / 下一篇 */
 .post-nav {
 	display: grid;
@@ -551,6 +587,7 @@ html[data-theme='dark'] body {
 	.back-to-top,
 	.heading-ball,
 	.post-nav,
+	.share-row,
 	.post-tags,
 	.lightbox,
 	.read-resume-toast {
@@ -597,3 +634,4 @@ html[data-theme='dark'] body {
 		break-after: avoid;
 	}
 }
+

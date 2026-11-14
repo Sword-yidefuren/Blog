@@ -1,4 +1,4 @@
-﻿---
+---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import { existsSync } from 'node:fs';
@@ -479,6 +479,11 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 						)
 					}
 					</div>
+					<div class="share-row">
+						<span class="share-label">分享这一篇</span>
+						<button type="button" class="share-btn" data-share="copy">复制链接</button>
+						<button type="button" class="share-btn" data-share="native" hidden>发给朋友</button>
+					</div>
 				</div>
 			</article>
 		</main>
@@ -767,6 +772,44 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 				localStorage.removeItem('readsize');
 			} catch {
 				/* 存储不可用就算了 */
+			}
+
+			// 分享：复制链接；手机上还能唤起系统分享面板
+			const shareRow = document.querySelector('.share-row');
+			if (shareRow) {
+				const copyBtn = shareRow.querySelector<HTMLButtonElement>('[data-share="copy"]');
+				const nativeBtn = shareRow.querySelector<HTMLButtonElement>('[data-share="native"]');
+				const shareUrl = location.origin + location.pathname;
+				const flash = (btn: HTMLButtonElement, text: string) => {
+					const original = btn.textContent ?? '';
+					btn.textContent = text;
+					btn.dataset.done = 'true';
+					window.setTimeout(() => {
+						btn.textContent = original;
+						delete btn.dataset.done;
+					}, 1400);
+				};
+
+				copyBtn?.addEventListener('click', async () => {
+					try {
+						await navigator.clipboard.writeText(shareUrl);
+						playCue('copy');
+						flash(copyBtn, '已复制');
+					} catch {
+						flash(copyBtn, '复制失败');
+					}
+				});
+
+				if (nativeBtn && typeof navigator.share === 'function') {
+					nativeBtn.hidden = false;
+					nativeBtn.addEventListener('click', async () => {
+						try {
+							await navigator.share({ title: document.title, url: shareUrl });
+						} catch {
+							/* 用户点了取消就算了 */
+						}
+					});
+				}
 			}
 		</script>
 	</body>
