@@ -1,0 +1,126 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const updated = '2026-11-14';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead
+			title={`现在 | ${SITE_TITLE}`}
+			description="此刻在做什么、在学什么、在找什么——大概每季度更新一次"
+		/>
+		<style>
+			main {
+				width: 750px;
+				max-width: calc(100% - 2em);
+				margin: auto;
+				padding: 3.5em 1em 4em;
+			}
+			h1 {
+				margin: 0 0 0.4em;
+				font-size: clamp(2.2rem, 6vw, 3.2rem);
+				line-height: 1.05;
+				letter-spacing: -0.02em;
+			}
+			.meta {
+				margin: 0 0 2.4em;
+				color: rgb(var(--gray));
+				font-size: 0.86em;
+			}
+			p {
+				margin: 0 0 1.2em;
+				color: rgb(var(--gray-dark));
+			}
+			h2 {
+				display: flex;
+				align-items: center;
+				margin: 2.6em 0 0.8em;
+				padding-bottom: 0.7em;
+				border-bottom: 1px solid rgb(var(--gray-light));
+				font-size: 1.02em;
+				letter-spacing: 0.04em;
+			}
+			h2::before {
+				content: '';
+				width: 3px;
+				height: 0.92em;
+				margin-right: 0.6em;
+				border-radius: 2px;
+				background: var(--accent);
+			}
+			ul {
+				margin: 0 0 1.2em;
+				padding-left: 1.2em;
+				color: rgb(var(--gray-dark));
+			}
+			li {
+				margin: 0.35em 0;
+			}
+			li::marker {
+				color: var(--accent);
+			}
+			.note {
+				margin-top: 2.4em;
+				padding-top: 1.2em;
+				border-top: 1px solid rgb(var(--gray-light));
+				color: rgb(var(--gray));
+				font-size: 0.86em;
+			}
+			@media (max-width: 720px) {
+				main {
+					padding: 2.4em 1em 3em;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main id="main" tabindex="-1">
+			<h1>现在</h1>
+			<p class="meta">最后更新 {updated} · 想到就改，不改说明没变</p>
+
+			<p>
+				这一页回答一个问题：如果此刻想找我，我们在聊的是同一件事吗。写得短，是因为想不清楚的事不该写上来。
+			</p>
+
+			<h2>在做什么</h2>
+			<ul>
+				<li>在深圳实习，白天做网页部署和软件开发，边做边补课。</li>
+				<li>
+					折腾一个住在自己电脑里的 QQ 机器人：接的是 DeepSeek，给它写了人格、记性和一点小情绪，也会自己发。
+				</li>
+				<li>写这个博客。想清楚一件事就写下来，顺手把站点也改一改。</li>
+			</ul>
+
+			<h2>在学什么</h2>
+			<ul>
+				<li>怎么把 AI 用明白：把想法说清楚、给它一个参照物，而不是让它猜。</li>
+				<li>前端和后端：从模板改到部署上线，缺哪块补哪块。</li>
+				<li>服务器运维：访问控制、证书、服务守护这些以前没碰过的东西。</li>
+			</ul>
+
+			<h2>在找什么</h2>
+			<ul>
+				<li>找实习，方向偏前后端，也想试试 AI 应用方向。</li>
+				<li>找能一起做东西的人：同学、网友、校外的都行。</li>
+			</ul>
+
+			<h2>最近信的几件事</h2>
+			<ul>
+				<li>工具不重要，把一件事做完比较重要。</li>
+				<li>报喜不报忧是常态，但偶尔也该跟家里说点实话。</li>
+				<li>AI 不会替你想清楚，它只是把你已经想清楚的部分放大。</li>
+			</ul>
+
+			<p class="note">
+				想聊就 QQ 或微信找我，号在<a href="/about">关于页</a>。这个页面最后一次改动是 {updated}，下一个季度我大概会再来改一次。
+			</p>
+		</main>
+		<Footer />
+	</body>
+</html>
