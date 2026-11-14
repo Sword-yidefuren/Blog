@@ -409,40 +409,44 @@ html[data-theme='dark'] body {
 	box-shadow: 0 20px 60px rgba(0, 0, 0, 55%);
 }
 
-/* 分享：文章末尾一行，不加数字、不加图标 */
+/* 分享：文章末尾一行图标（照用户给的那张图：图标 + 数字，无边框无背景） */
 .share-row {
 	display: flex;
 	align-items: center;
-	flex-wrap: wrap;
-	gap: 0.6em;
+	gap: 1.8em;
 	width: 750px;
 	max-width: calc(100% - 2em);
 	margin: 2.2em auto 0;
 	padding: 1.3em 1em 0;
 	border-top: 1px solid rgb(var(--gray-light));
 }
-.share-label {
+.share-action {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45em;
+	padding: 0.3em 0;
+	border: 0;
+	background: none;
 	color: rgb(var(--gray));
-	font-size: 0.82em;
-}
-.share-btn {
-	padding: 0.34em 0.9em;
-	border: 1px solid rgb(var(--gray-light));
-	border-radius: 999px;
-	background: transparent;
-	color: rgb(var(--gray-dark));
 	font-family: inherit;
-	font-size: 0.82em;
+	font-size: 0.88em;
 	cursor: pointer;
-	transition: 0.2s ease;
+	transition: color 0.2s ease;
 }
-.share-btn:hover {
-	border-color: var(--accent);
+.share-action svg {
+	width: 1.25em;
+	height: 1.25em;
+	fill: currentColor;
+	flex: none;
+}
+.share-action:hover {
 	color: var(--accent-text);
 }
-.share-btn[data-done='true'] {
-	border-color: var(--accent);
+.share-action[data-done='true'] {
 	color: var(--accent-text);
+}
+.share-count {
+	font-variant-numeric: tabular-nums;
 }
 
 /* 上一篇 / 下一篇 */
