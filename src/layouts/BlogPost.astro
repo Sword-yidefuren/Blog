@@ -480,6 +480,14 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 					}
 					</div>
 					<div class="share-row">
+						<button type="button" class="share-action" data-like data-slug={id} title="喜欢这一篇">
+							<svg viewBox="0 0 24 24" aria-hidden="true"
+								><path
+									d="M12 20.7c-1.1-.6-8.2-4.6-9.6-9.2A5.3 5.3 0 0 1 12 6.9a5.3 5.3 0 0 1 9.6 4.6c-1.4 4.6-8.5 8.6-9.6 9.2z"
+								></path></svg
+							>
+							<span>点赞</span>
+						</button>
 						<button type="button" class="share-action" data-share title="复制这一篇的链接">
 							<svg viewBox="0 0 24 24" aria-hidden="true"
 								><path
@@ -799,6 +807,67 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 						delete shareBtn.dataset.done;
 					}, 1400);
 				});
+			}
+
+			// 点赞：只记数，页面不显示数字（作者从 /stats 看）。同一台设备点过一次就不再重复计。
+			const likeBtn = document.querySelector<HTMLButtonElement>('.share-row [data-like]');
+			const slug = likeBtn?.dataset.slug ?? location.pathname.split('/').filter(Boolean).pop() ?? '';
+			if (likeBtn && slug) {
+				const label = likeBtn.querySelector('span');
+				const key = `liked:${slug}`;
+				const markLiked = () => {
+					likeBtn.dataset.done = 'true';
+					likeBtn.disabled = true;
+					if (label) label.textContent = '已赞';
+				};
+				try {
+					if (localStorage.getItem(key) === '1') markLiked();
+				} catch {
+					/* 存储不可用就每次都允许点 */
+				}
+
+				likeBtn.addEventListener('click', async () => {
+					if (likeBtn.dataset.done === 'true') return;
+					try {
+						const response = await fetch('/api/like', {
+							method: 'POST',
+							headers: { 'content-type': 'application/json' },
+							body: JSON.stringify({ slug }),
+						});
+						if (!response.ok) throw new Error('failed');
+						try {
+							localStorage.setItem(key, '1');
+						} catch {
+							/* 存不下就算了 */
+						}
+						playCue('like');
+						markLiked();
+					} catch {
+						if (label) label.textContent = '稍后再试';
+						window.setTimeout(() => {
+							if (label) label.textContent = '点赞';
+						}, 1600);
+					}
+				});
+			}
+
+			// 浏览计数：同一标签页只报一次，刷新和前进后退都不重复
+			if (slug) {
+				try {
+					const viewKey = `viewed:${slug}`;
+					if (!sessionStorage.getItem(viewKey)) {
+						sessionStorage.setItem(viewKey, '1');
+						fetch('/api/view', {
+							method: 'POST',
+							headers: { 'content-type': 'application/json' },
+							body: JSON.stringify({ slug }),
+						}).catch(() => {
+							/* 接口没部署就算了，不影响阅读 */
+						});
+					}
+				} catch {
+					/* 隐私模式下 sessionStorage 不可用，就不计数 */
+				}
 			}
 		</script>
 	</body>

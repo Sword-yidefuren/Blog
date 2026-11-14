@@ -1,0 +1,254 @@
+﻿---
+import { getCollection } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+// 构建期把 slug → 标题带进页面，统计接口只回数字，标题在这里补上
+const posts = await getCollection('blog');
+const titles = Object.fromEntries(posts.map((post) => [post.id, post.data.title]));
+const count = posts.length;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`统计 | ${SITE_TITLE}`} description="给自己看的浏览数与点赞数" />
+		<meta name="robots" content="noindex, nofollow" />
+		<style>
+			main {
+				width: 820px;
+				max-width: calc(100% - 2em);
+				margin: auto;
+				padding: 3em 1em 4em;
+			}
+			h1 {
+				margin: 0 0 0.3em;
+				font-size: 1.6rem;
+				line-height: 1.2;
+			}
+			.hint {
+				margin: 0 0 1.6em;
+				color: rgb(var(--gray));
+				font-size: 0.86em;
+			}
+			form {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.6em;
+				margin-bottom: 2em;
+			}
+			input {
+				flex: 1 1 16em;
+				padding: 0.5em 0.8em;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 8px;
+				background: var(--header-bg);
+				color: rgb(var(--gray-dark));
+				font-family: inherit;
+				font-size: 0.9em;
+			}
+			button {
+				padding: 0.5em 1.1em;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 999px;
+				background: transparent;
+				color: rgb(var(--gray-dark));
+				font-family: inherit;
+				font-size: 0.9em;
+				cursor: pointer;
+			}
+			button:hover {
+				border-color: var(--accent);
+				color: var(--accent-text);
+			}
+			.summary {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 2em;
+				margin: 0 0 1.4em;
+				color: rgb(var(--gray));
+				font-size: 0.86em;
+			}
+			.summary b {
+				color: rgb(var(--gray-dark));
+				font-size: 1.25em;
+				font-variant-numeric: tabular-nums;
+			}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 0.9em;
+			}
+			th,
+			td {
+				padding: 0.6em 0.4em;
+				border-bottom: 1px solid rgb(var(--gray-light));
+				text-align: left;
+			}
+			th {
+				color: rgb(var(--gray));
+				font-weight: 400;
+				font-size: 0.86em;
+			}
+			td.num,
+			th.num {
+				text-align: right;
+				font-variant-numeric: tabular-nums;
+				white-space: nowrap;
+			}
+			th:last-child,
+			td:last-child {
+				padding-left: 1.6em;
+			}
+			.muted {
+				color: rgb(var(--gray));
+			}
+			.status {
+				margin: 0 0 1.2em;
+				font-size: 0.86em;
+				color: rgb(var(--gray));
+			}
+			.status[data-error='true'] {
+				color: #b91c1c;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main id="main" tabindex="-1">
+			<h1>统计</h1>
+			<p class="hint">
+				只有自己看：填口令后显示每篇文章的浏览数与点赞数。口令是 Pages 环境变量里的
+				<code>STATS_TOKEN</code>，不会写进前端代码。
+			</p>
+
+			<form id="stats-form">
+				<input id="token" type="password" placeholder="口令" autocomplete="current-password" aria-label="统计口令" />
+				<button type="submit">查看</button>
+			</form>
+
+			<p class="status" id="status" role="status"></p>
+
+			<div class="summary" id="summary" hidden>
+				<span>文章 <b id="sum-posts">0</b></span>
+				<span>总浏览 <b id="sum-views">0</b></span>
+				<span>总点赞 <b id="sum-likes">0</b></span>
+			</div>
+
+			<table id="table" hidden>
+				<thead>
+					<tr>
+						<th>文章</th>
+						<th class="num">浏览</th>
+						<th class="num">点赞</th>
+						<th>更新</th>
+					</tr>
+				</thead>
+				<tbody id="rows"></tbody>
+			</table>
+		</main>
+		<Footer />
+		<script define:vars={{ titles, count }}>
+			const form = document.getElementById('stats-form');
+			const input = document.getElementById('token');
+			const status = document.getElementById('status');
+			const table = document.getElementById('table');
+			const rows = document.getElementById('rows');
+			const summary = document.getElementById('summary');
+
+			const say = (text, isError = false) => {
+				status.textContent = text;
+				status.dataset.error = isError ? 'true' : 'false';
+			};
+
+			const esc = (text) =>
+				String(text).replace(
+					/[&<>"]/g,
+					(ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch],
+				);
+
+			const render = (data) => {
+				const bySlug = new Map(data.map((row) => [row.slug, row]));
+				const all = Object.keys(titles);
+				for (const slug of bySlug.keys()) if (!all.includes(slug)) all.push(slug);
+
+				const list = all
+					.map((slug) => ({
+						slug,
+						title: titles[slug] ?? slug,
+						views: bySlug.get(slug)?.views ?? 0,
+						likes: bySlug.get(slug)?.likes ?? 0,
+						updated: bySlug.get(slug)?.updated_at ?? '',
+					}))
+					.sort((a, b) => b.views - a.views || b.likes - a.likes);
+
+				rows.innerHTML = list
+					.map(
+						(row) =>
+							`<tr><td>${esc(row.title)}</td><td class="num">${row.views}</td><td class="num">${row.likes}</td><td class="muted">${esc(row.updated.slice(0, 16))}</td></tr>`,
+					)
+					.join('');
+
+				document.getElementById('sum-posts').textContent = String(count);
+				document.getElementById('sum-views').textContent = String(
+					list.reduce((n, row) => n + row.views, 0),
+				);
+				document.getElementById('sum-likes').textContent = String(
+					list.reduce((n, row) => n + row.likes, 0),
+				);
+				table.hidden = false;
+				summary.hidden = false;
+			};
+
+			const load = async (token) => {
+				say('正在取数…');
+				try {
+					const res = await fetch(`/api/stats?token=${encodeURIComponent(token)}`, {
+						cache: 'no-store',
+					});
+					if (res.status === 404) {
+						say('口令不对，或者统计接口还没部署。', true);
+						return;
+					}
+					if (!res.ok) {
+						say(`接口出错了（${res.status}）`, true);
+						return;
+					}
+					const body = await res.json();
+					render(body.rows ?? []);
+					say(`共 ${(body.rows ?? []).length} 行数据`);
+					try {
+						localStorage.setItem('stats:token', token);
+					} catch {
+						/* 存不下就算了 */
+					}
+				} catch {
+					say('连不上接口：可能还没部署 Pages Functions。', true);
+				}
+			};
+
+			form.addEventListener('submit', (event) => {
+				event.preventDefault();
+				const token = input.value.trim();
+				if (!token) {
+					say('先填口令。', true);
+					return;
+				}
+				load(token);
+			});
+
+			try {
+				const saved = localStorage.getItem('stats:token');
+				if (saved) {
+					input.value = saved;
+					load(saved);
+				}
+			} catch {
+				/* 没有就算了 */
+			}
+		</script>
+	</body>
+</html>
+

@@ -1,15 +1,16 @@
-// 页面音效：默认关闭，只有「复制成功」和「点回到顶部」两处会响，外加打开开关时的一声确认。
+// 页面音效：默认关闭，只在「复制成功」「点回到顶部」「点赞成功」几处响，外加打开开关时的一声确认。
 // 音源在运行时合成成 40ms 的 WAV（约 3.5KB），不引任何第三方音频文件。
 
 const STORE_KEY = 'sword:sound';
 
-export type Cue = 'copy' | 'top' | 'toggle';
+export type Cue = 'copy' | 'top' | 'toggle' | 'like';
 
-// 复制：短促的高一点，像「收到了」；回顶：低一点，像「收束」；开关：介于两者之间
+// 复制：短促的高一点，像「收到了」；回顶：低一点，像「收束」；开关：介于两者之间；点赞：再高一点，轻快
 const PITCH: Record<Cue, number> = {
 	copy: 1046,
 	top: 784,
 	toggle: 988,
+	like: 1175,
 };
 
 const wavCache = new Map<Cue, string>();
