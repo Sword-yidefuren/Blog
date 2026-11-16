@@ -100,32 +100,7 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 			.last-updated-on {
 				font-style: italic;
 			}
-			/* 面包屑：首页 / 文章 / 当前标题 */
-			.crumbs {
-				display: flex;
-				flex-wrap: wrap;
-				align-items: baseline;
-				gap: 0.45em;
-				margin: 0 0 1.1em;
-				font-size: 0.78em;
-				color: rgb(var(--gray));
-			}
-			.crumbs a {
-				color: rgb(var(--gray));
-				text-decoration: none;
-			}
-			.crumbs a:hover {
-				color: var(--accent-text);
-			}
-			.crumbs span[aria-hidden] {
-				opacity: 0.5;
-			}
-			.crumbs .current {
-				max-width: 24em;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				white-space: nowrap;
-			}
+			/* 面包屑在 2026-11-16 去掉了：文章页就一条主线，那三行字纯属占地方 */
 			/* 标题锚点在 2026-11-12 去掉了：点了只是复制链接，实际没人用，反而在标题后挂个 # 碍眼 */
 
 			/* ---------- 文章目录 ---------- */
@@ -377,13 +352,6 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 				</div>
 				<div class="article-body">
 					<div class="article-head">
-						<nav class="crumbs" aria-label="面包屑">
-							<a href="/">首页</a>
-							<span aria-hidden="true">/</span>
-							<a href="/blog">文章</a>
-							<span aria-hidden="true">/</span>
-							<span class="current" aria-current="page">{title}</span>
-						</nav>
 						<div class="title">
 							<div class="date">
 								<FormattedDate date={pubDate} />
