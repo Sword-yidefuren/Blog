@@ -1,4 +1,4 @@
-﻿---
+---
 import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
@@ -13,13 +13,14 @@ const latest = posts.slice(0, 4);
 // 首页只露最近几篇；年份久远也不至于误读，这里保持「月日」的轻量写法
 const shortDate = (date: Date) => `${date.getMonth() + 1} 月 ${date.getDate()} 日`;
 
-type TagName = '生活' | '学习' | '工作' | '心情';
+type TagName = '生活' | '学习' | '工作' | '心情' | '摸鱼思考';
 
 const topics: { name: TagName; note: string; count: number }[] = [
 	{ name: '学习', note: '笔记、踩坑、跟着 AI 学新东西', count: 0 },
 	{ name: '生活', note: '日常、碎碎念、偶尔的情绪', count: 0 },
 	{ name: '工作', note: '实习、求职、做项目的过程', count: 0 },
 	{ name: '心情', note: '当下在想什么、被什么绊住', count: 0 },
+	{ name: '摸鱼思考', note: '上班摸鱼时和 AI 聊出来的事', count: 0 },
 ].map((topic) => ({
 	...topic,
 	count: posts.filter((post) => post.data.tags.includes(topic.name)).length,
@@ -219,7 +220,7 @@ const newestPost = posts[0];
 			/* ---------- 按主题逛 ---------- */
 			.topics {
 				display: grid;
-				grid-template-columns: repeat(4, 1fr);
+				grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
 				gap: 0.8em;
 				list-style: none;
 				margin: 1.1em 0 0;
