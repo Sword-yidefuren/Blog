@@ -73,7 +73,8 @@ const shortDate = (date: Date) => `${date.getMonth() + 1} 月 ${date.getDate()} 
 		font-size: 0.88em;
 		line-height: 1.6;
 		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 1;
+		/* 两行：桌面 820 宽一行约 39 字，两行 ≈ 78 字，现有摘要全放得下、不再出现省略号 */
+		-webkit-line-clamp: 2;
 	}
 	.mins {
 		color: rgb(var(--gray));
@@ -93,6 +94,10 @@ const shortDate = (date: Date) => `${date.getMonth() + 1} 月 ${date.getDate()} 
 		}
 		.mins {
 			display: none;
+		}
+		/* 手机一行只有 17 字上下，两行还是把一句话砍半；放到四行（≈68 字）才够读完 */
+		.desc {
+			-webkit-line-clamp: 4;
 		}
 	}
 </style>
