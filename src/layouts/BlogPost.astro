@@ -640,12 +640,10 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 			// 文章目录：窄屏用 <details> 折叠文字版，宽屏用左侧刻度；小球贴在正文标题旁
 			const toc = document.querySelector('.toc');
 			const tocDetails = toc?.querySelector('details');
-			const wideToc = window.matchMedia('(min-width: 1200px)');
-			const syncTocOpen = () => {
-				if (tocDetails) tocDetails.open = !wideToc.matches;
-			};
-			syncTocOpen();
-			wideToc.addEventListener('change', syncTocOpen);
+			// 默认收起：手机上 8 条目录会把正文顶到第二屏，读者想看再点开。
+			// 宽屏这块本来 display:none（由左侧刻度轨接管），展开与否不影响；
+			// 没有 JS 时 markup 里的 <details open> 仍会展开，不至于看不到目录。
+			if (tocDetails) tocDetails.open = false;
 
 			const headingBall = document.querySelector('.heading-ball');
 			const ballDot = headingBall?.querySelector('.ball-dot');
