@@ -14,6 +14,8 @@ const blog = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: z.optional(image()),
+			// 首页「从这里开始读」的排序号：1 是最先推荐的，不填就不进这块
+			featured: z.number().int().positive().optional(),
 			tags: z.array(z.enum(['生活', '学习', '工作', '心情', '摸鱼思考'])).default([]),
 		}),
 });

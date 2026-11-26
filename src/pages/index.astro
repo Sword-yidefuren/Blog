@@ -9,6 +9,10 @@ const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 const latest = posts.slice(0, 4);
+// 精选：「从这里开始读」按 featured 号排序，给第一次来的人一条入口
+const featured = posts
+	.filter((post) => post.data.featured)
+	.sort((a, b) => (a.data.featured ?? 99) - (b.data.featured ?? 99));
 
 // 首页只露最近几篇；年份久远也不至于误读，这里保持「月日」的轻量写法
 const shortDate = (date: Date) => `${date.getMonth() + 1} 月 ${date.getDate()} 日`;
@@ -211,10 +215,54 @@ const newestPost = posts[0];
 				font-size: 0.88em;
 				line-height: 1.6;
 				-webkit-box-orient: vertical;
-				-webkit-line-clamp: 1;
+				-webkit-line-clamp: 2;
 			}
 			.posts a:hover .post-title {
 				color: var(--accent-text);
+			}
+
+			/* ---------- 从这里开始读 ---------- */
+			.picks {
+				counter-reset: pick;
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+			.picks li {
+				counter-increment: pick;
+			}
+			.picks li + li {
+				border-top: 1px solid rgb(var(--gray-light));
+			}
+			.picks a {
+				display: grid;
+				grid-template-columns: 4.9em 1fr;
+				gap: 0 1.4em;
+				padding: 1.05em 0;
+				text-decoration: none;
+			}
+			/* 编号用等宽数字，右对齐，标题列跟「最近在写」的日期列对齐 */
+			.pick-idx {
+				padding-top: 0.26em;
+				color: rgb(var(--gray));
+				font-size: 0.82em;
+				font-variant-numeric: tabular-nums;
+				font-weight: 700;
+				letter-spacing: 0.02em;
+				text-align: right;
+				transition: color 0.2s ease;
+			}
+			.pick-idx::before {
+				content: counter(pick, decimal-leading-zero);
+			}
+			.picks a:hover .pick-idx {
+				color: var(--accent);
+			}
+			.picks a:hover .post-title {
+				color: var(--accent-text);
+			}
+			.picks .post-desc {
+				-webkit-line-clamp: 2;
 			}
 
 			/* ---------- 按主题逛 ---------- */
@@ -345,6 +393,14 @@ const newestPost = posts[0];
 					padding-top: 0;
 					font-size: 0.76em;
 				}
+				/* 手机上摘要给到四行，跟文章列表页同一套标准 */
+				.post-desc {
+					-webkit-line-clamp: 4;
+				}
+				.picks a {
+					grid-template-columns: 2.4em 1fr;
+					gap: 0 1em;
+				}
 				.topics {
 					grid-template-columns: 1fr;
 				}
@@ -401,6 +457,29 @@ const newestPost = posts[0];
 					)
 				}
 			</section>
+
+			{
+				featured.length > 0 && (
+					<section class="section">
+						<div class="sec-head">
+							<h2>从这里开始读</h2>
+						</div>
+						<ol class="picks">
+							{featured.map((post) => (
+								<li>
+									<a href={`/blog/${post.id}/`}>
+										<span class="pick-idx" aria-hidden="true" />
+										<span class="post-body">
+											<span class="post-title">{post.data.title}</span>
+											<span class="post-desc">{post.data.description}</span>
+										</span>
+									</a>
+								</li>
+							))}
+						</ol>
+					</section>
+				)
+			}
 
 			<section class="section">
 				<div class="sec-head">
@@ -461,7 +540,7 @@ const newestPost = posts[0];
 					</div>
 					<div>
 						<dt>在找</dt>
-						<dd>一份前端 / 全栈实习</dd>
+						<dd>一份 AI 开发方向的实习</dd>
 					</div>
 				</dl>
 			</section>
