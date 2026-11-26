@@ -87,6 +87,8 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 			}
 			.title h1 {
 				margin: 0 0 0.5em 0;
+				/* 长标题别再折成「……看不 / 出」这种一行只剩一个字的样子（不支持就按普通折行） */
+				text-wrap: balance;
 			}
 			.date {
 				margin-bottom: 0.5em;
