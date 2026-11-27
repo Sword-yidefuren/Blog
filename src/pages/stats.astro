@@ -1,4 +1,4 @@
-﻿---
+---
 import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
@@ -205,11 +205,18 @@ const count = posts.length;
 			const load = async (token) => {
 				say('正在取数…');
 				try {
-					const res = await fetch(`/api/stats?token=${encodeURIComponent(token)}`, {
+					// 口令放请求头，不再拼进 URL（URL 会进 CF 日志和浏览器历史）
+					const res = await fetch('/api/stats', {
+						method: 'POST',
+						headers: { authorization: `Bearer ${token}` },
 						cache: 'no-store',
 					});
 					if (res.status === 404) {
 						say('口令不对，或者统计接口还没部署。', true);
+						return;
+					}
+					if (res.status === 429) {
+						say('试得太频繁了，过几分钟再来。', true);
 						return;
 					}
 					if (!res.ok) {
@@ -220,7 +227,8 @@ const count = posts.length;
 					render(body.rows ?? []);
 					say(`共 ${(body.rows ?? []).length} 行数据`);
 					try {
-						localStorage.setItem('stats:token', token);
+						// 只放这个标签页：关掉浏览器就没了
+						sessionStorage.setItem('stats:token', token);
 					} catch {
 						/* 存不下就算了 */
 					}
@@ -240,7 +248,13 @@ const count = posts.length;
 			});
 
 			try {
-				const saved = localStorage.getItem('stats:token');
+				// 旧版本把口令存在 localStorage 里，清掉
+				localStorage.removeItem('stats:token');
+			} catch {
+				/* 没关系 */
+			}
+			try {
+				const saved = sessionStorage.getItem('stats:token');
 				if (saved) {
 					input.value = saved;
 					load(saved);
