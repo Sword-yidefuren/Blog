@@ -612,31 +612,79 @@ const ogImage = ogFile && existsSync(ogFile) ? `/images/og/${id}.jpg` : undefine
 				window.scrollTo({ top: 0, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
 			});
 
-			// 图片灯箱：点正文里的图片放大，点任意处或 Esc 关闭
+			// 图片灯箱：点正文里的图片放大；点背景或按 Esc 关闭，焦点还给原来那张图。
+			// 打开时锁住页面滚动，并把它当模态框（aria-modal + Tab 不跑到后面的正文）。
 			let lightbox = null;
+			let lightboxFrom = null;
+			const closeLightbox = () => {
+				if (!lightbox) return;
+				const overlay = lightbox;
+				lightbox = null;
+				overlay.remove();
+				document.documentElement.classList.remove('lightbox-open');
+				if (lightboxFrom instanceof HTMLElement) lightboxFrom.focus({ preventScroll: true });
+				lightboxFrom = null;
+			};
+			const openLightbox = (img: HTMLImageElement) => {
+				closeLightbox();
+				const overlay = document.createElement('div');
+				overlay.className = 'lightbox';
+				overlay.setAttribute('role', 'dialog');
+				overlay.setAttribute('aria-modal', 'true');
+				overlay.setAttribute('aria-label', '查看大图');
+				overlay.tabIndex = -1;
+				const big = new Image();
+				big.src = img.currentSrc || img.src;
+				big.alt = img.alt;
+				overlay.appendChild(big);
+				// 只有点背景才关；点图片本身不该关
+				overlay.addEventListener('click', (event) => {
+					if (event.target === overlay) closeLightbox();
+				});
+				document.body.appendChild(overlay);
+				lightboxFrom = img;
+				document.documentElement.classList.add('lightbox-open');
+				lightbox = overlay;
+				requestAnimationFrame(() => {
+					overlay.classList.add('show');
+					overlay.focus({ preventScroll: true });
+				});
+			};
+
+			// 正文图片做成键盘也能触发的「查看大图」：Tab 能到，回车 / 空格能开
+			document.querySelectorAll<HTMLImageElement>('.prose img').forEach((img) => {
+				if (img.closest('a')) return; // 已经包在链接里的，链接本身就能 Tab 到
+				img.tabIndex = 0;
+				img.setAttribute('role', 'button');
+				img.setAttribute('aria-label', img.alt ? `查看大图：${img.alt}` : '查看大图');
+			});
+			document.addEventListener('keydown', (event) => {
+				const target = event.target;
+				if (
+					target instanceof HTMLImageElement &&
+					target.closest('.prose') &&
+					(event.key === 'Enter' || event.key === ' ')
+				) {
+					event.preventDefault();
+					openLightbox(target);
+					return;
+				}
+				if (!lightbox) return;
+				if (event.key === 'Escape') {
+					event.preventDefault();
+					closeLightbox();
+					return;
+				}
+				// 里面只有一张图，Tab 别把人带到背后那些链接上
+				if (event.key === 'Tab') event.preventDefault();
+			});
 			document.addEventListener('click', (event) => {
 				const target = event.target;
 				if (!(target instanceof HTMLImageElement)) return;
 				if (!target.closest('.prose')) return;
-				lightbox?.remove();
-				const overlay = document.createElement('div');
-				overlay.className = 'lightbox';
-				overlay.setAttribute('role', 'dialog');
-				overlay.setAttribute('aria-label', '查看大图');
-				const big = new Image();
-				big.src = target.currentSrc || target.src;
-				big.alt = target.alt;
-				overlay.appendChild(big);
-				overlay.addEventListener('click', () => overlay.remove());
-				document.body.appendChild(overlay);
-				requestAnimationFrame(() => overlay.classList.add('show'));
-				lightbox = overlay;
-			});
-			document.addEventListener('keydown', (event) => {
-				if (event.key === 'Escape') {
-					lightbox?.remove();
-					lightbox = null;
-				}
+				// 图片有时候是被 <a> 包着的，别让链接跳走
+				if (target.closest('a')) event.preventDefault();
+				openLightbox(target);
 			});
 
 			// 文章目录：窄屏用 <details> 折叠文字版，宽屏用左侧刻度；小球贴在正文标题旁

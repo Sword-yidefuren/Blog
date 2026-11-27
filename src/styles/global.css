@@ -407,6 +407,15 @@ html[data-theme='dark'] body {
 	max-height: 100%;
 	border-radius: 6px;
 	box-shadow: 0 20px 60px rgba(0, 0, 0, 55%);
+	cursor: default;
+}
+/* 灯箱打开时别让页面跟着滚（背景那一层已经铺满视口） */
+html.lightbox-open {
+	overflow: hidden;
+}
+/* 灯箱自己拿焦点，但不需要那圈焦点描边 */
+.lightbox:focus {
+	outline: none;
 }
 
 /* 分享：文章末尾一行图标（照用户给的那张图：图标 + 数字，无边框无背景） */
